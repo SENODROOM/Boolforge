@@ -125,7 +125,7 @@ canvas {
     position: absolute;
     background: var(--bg-light);
     border: 2px solid var(--accent-primary);
-    padding: 20px;
+    padding: 5px;
     font-family: 'JetBrains Mono', monospace;
     font-weight: 600;
     font-size: 14px;
@@ -161,7 +161,6 @@ canvas {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
 }
 
 .gate-symbol {
@@ -183,6 +182,7 @@ canvas {
     letter-spacing: 1.5px;
     font-weight: 700;
     text-transform: uppercase;
+    margin-bottom: 11px;
 }
 
 .gate-id {
@@ -218,10 +218,13 @@ canvas {
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1.2);
     }
+
     50% {
         opacity: 0.6;
         transform: translate(-50%, -50%) scale(1.5);
@@ -435,9 +438,12 @@ td:hover {
 }
 
 @keyframes glow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
     }
+
     50% {
         box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
     }
@@ -563,6 +569,7 @@ td:hover {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

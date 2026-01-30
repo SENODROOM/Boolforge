@@ -146,15 +146,14 @@ function addGate(type) {
 
     const gateEl = document.createElement('div');
     gateEl.className = 'gate' + (isOutput ? ' output-gate' : '');
-    
+
     // Add gate symbol
     const symbolHTML = gateSymbols[type] || '';
-    
+
     gateEl.innerHTML = `
         <div class="gate-content">
             ${symbolHTML}
             <div class="gate-label">${type}</div>
-            <div class="gate-id">ID: ${gate.id}</div>
         </div>
     `;
     gateEl.style.left = gate.x + 'px';
@@ -206,19 +205,19 @@ function snapToGrid(value) {
 
 function startDrag(e, gate) {
     if (e.target.classList.contains('connection-point')) return;
-    
+
     selectedGate = gate;
     dragging = true;
     dragOffset.x = e.clientX - gate.x;
     dragOffset.y = e.clientY - gate.y;
-    
+
     // Set initial target position
     targetX = gate.x;
     targetY = gate.y;
-    
+
     gate.element.classList.add('selected');
     gate.element.style.cursor = 'grabbing';
-    
+
     // Add visual feedback
     gate.element.style.transform = 'scale(1.05)';
     gate.element.style.zIndex = '1000';
@@ -230,13 +229,13 @@ function smoothDrag() {
         // Interpolate towards target position
         const dx = targetX - selectedGate.x;
         const dy = targetY - selectedGate.y;
-        
+
         selectedGate.x += dx * DRAG_SMOOTHING;
         selectedGate.y += dy * DRAG_SMOOTHING;
-        
+
         selectedGate.element.style.left = selectedGate.x + 'px';
         selectedGate.element.style.top = selectedGate.y + 'px';
-        
+
         drawWires();
     }
     requestAnimationFrame(smoothDrag);
@@ -250,15 +249,15 @@ document.addEventListener('mousemove', (e) => {
         // Update target position with optional grid snapping
         const rawX = e.clientX - dragOffset.x;
         const rawY = e.clientY - dragOffset.y;
-        
+
         // Constrain to canvas bounds
         const bounds = container.getBoundingClientRect();
         const maxX = bounds.width - selectedGate.element.offsetWidth;
         const maxY = bounds.height - selectedGate.element.offsetHeight;
-        
+
         targetX = snapToGrid(Math.max(0, Math.min(maxX, rawX)));
         targetY = snapToGrid(Math.max(0, Math.min(maxY, rawY)));
-        
+
         // Show snap guide if enabled
         if (SNAP_TO_GRID) {
             selectedGate.element.classList.add('snapping');
@@ -273,7 +272,7 @@ document.addEventListener('mouseup', () => {
         selectedGate.element.style.cursor = 'move';
         selectedGate.element.style.transform = 'scale(1)';
         selectedGate.element.style.zIndex = '';
-        
+
         // Final snap to grid
         if (SNAP_TO_GRID) {
             selectedGate.x = snapToGrid(selectedGate.x);
@@ -620,9 +619,9 @@ function loadCircuit() {
 
                     const gateEl = document.createElement('div');
                     gateEl.className = 'gate' + (isOutput ? ' output-gate' : '');
-                    
+
                     const symbolHTML = gateSymbols[gData.type] || '';
-                    
+
                     gateEl.innerHTML = `
                         <div class="gate-content">
                             ${symbolHTML}
