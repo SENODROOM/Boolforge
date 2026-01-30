@@ -1,372 +1,170 @@
-# Logic Gate Simulator
+# Boolforge - Logic Gate Simulator (React)
 
-A **browser-based interactive Logic Gate Simulator** built using **HTML, CSS, and Vanilla JavaScript**. This project allows users to visually design digital logic circuits by placing gates, connecting them with wires, toggling inputs, observing real-time outputs, and automatically generating truth tables.
+A professional logic gate simulator converted to React, featuring drag-and-drop gates, wire connections, truth table generation, and circuit save/load functionality.
 
-The simulator is designed for **students, beginners, and anyone learning digital logic** who wants to understand how logic gates work through visual experimentation.
+## Features
 
----
+- 🎨 **Interactive Canvas**: Drag and drop logic gates on a grid-based canvas
+- 🔌 **Wire Connections**: Connect gates by clicking output → input connection points
+- 🗑️ **Click to Delete Wires**: Click on any wire to remove it instantly
+- ⌨️ **Keyboard Shortcuts**: Undo (Ctrl+Z), Redo (Ctrl+Shift+Z), Delete, Escape
+- ↶ **Undo/Redo**: Full history support with up to 50 states
+- 📊 **Truth Table Generator**: Automatically generates truth tables for your circuits
+- 💾 **Save/Load Circuits**: Export and import circuit designs as JSON
+- ⚡ **Live Evaluation**: Real-time circuit evaluation with visual feedback
+- 🎯 **Logic Gates**: AND, OR, NOT, NAND, NOR, XOR, XNOR, BUFFER, INPUT, OUTPUT
+- 🎮 **Smooth Interactions**: Snap-to-grid, smooth animations, glowing active wires
 
-## 🚀 Features
+## Setup Options
 
-- Add logic gates: **INPUT, OUTPUT, AND, OR, NOT, NAND, NOR, XOR, XNOR, BUFFER**
-- Drag & drop gates on a grid-based canvas
-- Connect gates using animated wires
-- Live signal propagation (green = 1, dark = 0)
-- Toggle INPUT gates to test circuits
-- Automatic **truth table generation**
-- Save circuits as JSON files
-- Load previously saved circuits
-- Delete gates (right-click) and wires (click wire)
-- Real-time statistics (gate count, wire count, inputs, outputs)
+### Option 1: Quick Start (No Build Tools)
 
----
+1. Open `index-react.html` directly in your browser
+2. The component uses React from CDN and Babel standalone for JSX transformation
+3. Perfect for quick testing and development
 
-## 📁 Project Structure
+### Option 2: Modern Development Setup (Recommended)
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+3. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+4. **Preview production build:**
+   ```bash
+   npm run preview
+   ```
+
+## Project Structure
 
 ```
-logic-gate-simulator/
-│
-├── index.html     # Application structure (UI layout)
-├── styles.css     # Complete UI styling and animations
-├── script.js      # Core logic, interaction, simulation engine
-└── README.md      # Project documentation
+boolforge-react/
+├── Boolforge.jsx          # Main React component
+├── main.jsx               # Entry point for Vite
+├── index.html             # HTML template for Vite
+├── index-react.html       # Standalone HTML (CDN version)
+├── package.json           # NPM dependencies
+├── vite.config.js         # Vite configuration
+└── README.md              # This file
 ```
 
----
-
-## 🧠 How the Project Works (High-Level)
-
-1. **HTML** creates the layout (sidebar, canvas, truth table panel)
-2. **CSS** styles the UI (dark theme, gates, wires, animations)
-3. **JavaScript** handles:
-   - Gate creation & deletion
-   - Dragging logic
-   - Wire connections
-   - Boolean evaluation
-   - Truth table generation
-   - Saving & loading circuits
-
----
-
-## 🧱 index.html — Structure Explained
-
-### 1. Fonts & Styles
-```html
-<link rel="stylesheet" href="styles.css">
-```
-- Loads the custom dark theme and UI styling
-- Google Fonts provide a **monospace, circuit-style look**
-
----
-
-### 2. Main Layout
-```html
-<div class="container">...</div>
-```
-The app uses a **3-column grid layout**:
-
-| Section | Purpose |
-|------|--------|
-| Sidebar | Gate library & instructions |
-| Canvas | Circuit design area |
-| Right Panel | Inputs, outputs, truth table |
-
----
-
-### 3. Gate Library (Sidebar)
-```html
-<button onclick="addGate('AND')">AND Gate</button>
-```
-- Each button calls `addGate(type)`
-- Dynamically creates a gate on the canvas
-
----
-
-### 4. Canvas Area
-```html
-<canvas id="wireCanvas"></canvas>
-```
-- Used **only for drawing wires**
-- Gates themselves are HTML elements placed above the canvas
-
----
-
-### 5. Truth Table & Controls
-- INPUT toggles
-- OUTPUT displays
-- Buttons for:
-  - Update Table
-  - Save Circuit
-  - Load Circuit
-  - Clear All
-
----
-
-## 🎨 styles.css — Styling Explained
-
-### CSS Variables (Theme)
-```css
-:root {
-  --bg-dark: #0a0e1a;
-  --accent-primary: #00ff88;
-}
-```
-- Centralized theme colors
-- Makes the UI consistent and easy to customize
-
----
-
-### Gate Styling
-```css
-.gate {
-  position: absolute;
-  border: 2px solid var(--accent-primary);
-}
-```
-- Gates are draggable blocks
-- Absolute positioning allows free movement
-
----
-
-### Connection Points
-```css
-.connection-point {
-  width: 12px;
-  height: 12px;
-}
-```
-- Small circles on gates
-- Inputs on the left, outputs on the right
-- Highlighted when active
-
----
-
-### Wire Visualization
-- Wires glow **green** when signal = `1`
-- Dark when signal = `0`
-- Animated using canvas shadows
-
----
-
-## 🧠 script.js — JavaScript Explained from Scratch
-
-### 1. Core Data Structures
-```js
-let gates = [];
-let wires = [];
-```
-
-#### Gate Object
-Each gate is stored as an object:
-```js
-{
-  id,
-  type,
-  x, y,
-  inputs,
-  inputValues,
-  element
-}
-```
-
-#### Wire Object
-```js
-{
-  id,
-  from,
-  to,
-  toIndex
-}
-```
-
----
-
-### 2. Canvas Setup
-```js
-const canvas = document.getElementById('wireCanvas');
-```
-- Used only for wire rendering
-- Automatically resizes with window
-
----
-
-### 3. Adding a Gate
-```js
-function addGate(type) { ... }
-```
-
-What this function does:
-1. Determines gate type (INPUT, OUTPUT, NOT, etc.)
-2. Creates a JavaScript gate object
-3. Creates a DOM element (`div`)
-4. Adds input/output connection points
-5. Enables dragging and right-click deletion
-6. Stores the gate in `gates[]`
-
----
-
-### 4. Drag & Drop Logic
-```js
-startDrag()
-mousemove
-mouseup
-```
-
-- Calculates mouse offset
-- Updates gate position in real-time
-- Redraws wires while dragging
-
----
-
-### 5. Connecting Gates (Wires)
-```js
-handleConnectionClick()
-```
-
-Process:
-1. Click output → select source
-2. Click input → create wire
-3. Prevents duplicate connections
-4. Stores wire in `wires[]`
-
----
-
-### 6. Drawing Wires
-```js
-drawWires()
-```
-
-- Uses **Bezier curves** for smooth wires
-- Color depends on evaluated signal
-- Re-drawn continuously for live updates
-
----
-
-### 7. Gate Evaluation (Logic Engine)
-```js
-function evaluateGate(gate) { ... }
-```
-
-This is the **core logic simulator**.
-
-Example:
-```js
-case 'AND':
-  return inputs[0] && inputs[1];
-```
-
-- Uses recursion
-- Evaluates inputs by following wires backward
-
----
-
-### 8. Input Toggles
-```js
-toggleInput(gateId)
-```
-
-- Flips input value (0 ↔ 1)
-- Updates:
-  - Outputs
-  - Wires
-  - Truth table
-
----
-
-### 9. Truth Table Generation
-```js
-generateTruthTable()
-```
-
-Steps:
-1. Count INPUT gates
-2. Generate `2^n` combinations
-3. Assign inputs programmatically
-4. Evaluate outputs
-5. Render HTML table
-
----
-
-### 10. Saving & Loading Circuits
-
-#### Save
-```js
-saveCircuit()
-```
-- Serializes gates & wires into JSON
-- Downloads file locally
-
-#### Load
-```js
-loadCircuit()
-```
-- Reads JSON
-- Rebuilds gates & wires
-- Restores positions and values
-
----
-
-### 11. Deleting & Clearing
-
-- **Right-click gate** → delete gate & wires
-- **Click wire** → delete wire
-- **Clear All** → reset simulator
-
----
-
-## 📊 Live Statistics
-
-```js
-updateStats()
-```
-Displays:
-- Total gates
-- Total wires
-- Number of inputs
-- Number of outputs
-
----
-
-## 🧪 Educational Value
-
-This project helps users understand:
-
-- Boolean logic
-- Digital circuit design
-- Signal propagation
-- Truth tables
-- Graph traversal (recursive evaluation)
-- Event-driven programming
-
----
-
-## 🛠 Technologies Used
-
-- **HTML5** – Structure
-- **CSS3** – Styling & animations
-- **JavaScript (ES6)** – Logic & interaction
-- **Canvas API** – Wire rendering
-
----
-
-## 📌 Future Improvements
-
-- Clocked circuits
-- Flip-flops & memory
-- Multi-output gates
-- Zoom & pan canvas
-- Export as image
-
----
-
-## 👤 Author
-
-**Muhammad Saad Amin**  
-Logic Gate Simulator Project
-
----
-
-## 📜 License
-
-This project is open-source and free to use for learning and educational purposes.
+## Component Architecture
+
+The React component is structured as follows:
+
+### State Management
+- `gates`: Array of all gate objects
+- `wires`: Array of all wire connections
+- `selectedGate`: Currently selected gate for dragging
+- `connectingFrom`: Source gate when creating a wire
+- `dragging`: Boolean flag for drag state
+
+### Key Functions
+- `addGate(type)`: Adds a new gate to the canvas
+- `evaluateGate(gate)`: Recursively evaluates gate logic
+- `drawWires()`: Renders wire connections on canvas
+- `generateTruthTable()`: Creates truth table from circuit
+- `saveCircuit()`: Exports circuit as JSON
+- `loadCircuit()`: Imports circuit from JSON file
+
+## Usage Instructions
+
+1. **Add Gates**: Click buttons in the sidebar to add gates to the canvas
+2. **Move Gates**: Click and drag gates to reposition them
+3. **Connect Wires**: 
+   - Click on an output connection point (right side)
+   - Click on an input connection point (left side) to complete the wire
+4. **Delete Wires**: Click directly on any wire to remove it
+5. **Toggle Inputs**: Use toggle switches to change input values
+6. **View Outputs**: See real-time output values in the truth table panel
+7. **Delete Gates**: Right-click on a gate to delete it
+8. **Generate Truth Table**: Click "Update Table" to see all possible input/output combinations
+9. **Save Circuit**: Export your circuit design as a JSON file
+10. **Load Circuit**: Import a previously saved circuit
+
+### Keyboard Shortcuts
+
+- **Ctrl+Z / Cmd+Z**: Undo last action
+- **Ctrl+Shift+Z / Cmd+Shift+Z**: Redo action
+- **Ctrl+Y / Cmd+Y**: Redo action (alternative)
+- **Delete / Backspace**: Delete selected gate
+- **Escape**: Cancel wire connection mode
+
+## Conversion Notes
+
+This React version maintains all the functionality of the original vanilla JavaScript implementation with the following improvements:
+
+### ✅ Converted Features
+- Complete state management using React hooks
+- Draggable gates with smooth animations
+- Wire rendering on HTML canvas
+- Real-time logic evaluation
+- Truth table generation
+- Circuit save/load functionality
+- All 10 gate types (INPUT, OUTPUT, AND, OR, NOT, NAND, NOR, XOR, XNOR, BUFFER)
+
+### 🐛 Bug Fixes (v2.0)
+- **Fixed Broken Wires**: Resolved issue where wires would disappear or not render properly
+  - Changed wire storage from object references to gate IDs
+  - Fixed wire lookup to always use current gate array
+  - Wires now persist correctly across all operations
+- **Canvas Pointer Events**: Fixed canvas interaction for wire deletion
+- **Connection Point Active State**: Fixed visual feedback when creating connections
+- **Evaluation Dependencies**: Fixed useCallback dependencies to prevent stale closures
+
+### 🚀 New Features (v2.0)
+- **Undo/Redo System**: Full history support with up to 50 states
+- **Keyboard Shortcuts**: 
+  - Ctrl+Z / Cmd+Z for undo
+  - Ctrl+Shift+Z / Cmd+Shift+Z or Ctrl+Y for redo
+  - Delete/Backspace to remove selected gates
+  - Escape to cancel wire connections
+- **Click to Delete Wires**: Click any wire to instantly remove it
+- **Visual History Buttons**: Undo/Redo buttons with disabled states
+- **Improved Instructions**: Added keyboard shortcuts guide in sidebar
+
+### 🎨 Styling
+- All CSS has been converted to CSS-in-JS using styled-jsx syntax
+- Original color scheme and animations preserved
+- Grid background, glow effects, and transitions maintained
+
+### ⚛️ React-Specific Improvements
+- Declarative component structure
+- Proper event handling with React synthetic events
+- useCallback and useEffect hooks for performance optimization
+- Cleaner separation of concerns
+- No DOM manipulation - everything driven by state
+- Immutable state updates for better React reconciliation
+
+## Browser Compatibility
+
+- Modern browsers (Chrome, Firefox, Safari, Edge)
+- Requires JavaScript enabled
+- Canvas API support required for wire rendering
+
+## Technologies
+
+- React 18
+- HTML5 Canvas
+- CSS Grid & Flexbox
+- JavaScript ES6+
+- Vite (for build tooling)
 
+## License
+
+MIT License - Feel free to use and modify for your own projects!
+
+## Credits
+
+Original design: Boolforge
+React conversion: Complete component refactor with modern React patterns

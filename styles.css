@@ -7,7 +7,7 @@
     --accent-danger: #ff3366;
     --text-primary: #e8f0ff;
     --text-secondary: #8b9dc3;
-    --grid-color: rgba(0, 255, 136, 0.08);
+    --grid-color: rgba(220, 220, 220, 0.08);
     --wire-on: #00ff88;
     --wire-off: #334155;
 }
@@ -118,7 +118,7 @@ canvas {
     top: 0;
     left: 0;
     cursor: crosshair;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
 .gate {
@@ -137,6 +137,19 @@ canvas {
     text-align: center;
     border-radius: 4px;
     will-change: transform;
+    animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .gate:hover {
@@ -151,10 +164,7 @@ canvas {
     box-shadow: 0 8px 40px rgba(0, 212, 255, 0.6);
     cursor: grabbing;
     z-index: 1000;
-}
-
-.gate.snapping {
-    transition: all 0.1s ease-out;
+    transition: none;
 }
 
 .gate-content {
@@ -183,12 +193,6 @@ canvas {
     font-weight: 700;
     text-transform: uppercase;
     margin-bottom: 11px;
-}
-
-.gate-id {
-    font-size: 10px;
-    color: var(--text-secondary);
-    opacity: 0.7;
 }
 
 .connection-point {
@@ -476,10 +480,6 @@ td:hover {
     color: var(--accent-primary);
 }
 
-.wire-hitbox {
-    cursor: pointer;
-}
-
 .input-toggle {
     display: flex;
     align-items: center;
@@ -564,22 +564,6 @@ td:hover {
     font-weight: 700;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.gate {
-    animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 ::-webkit-scrollbar {
     width: 4px;
 }
@@ -595,30 +579,4 @@ td:hover {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-secondary);
-}
-
-/* Smooth dragging enhancement */
-.gate {
-    transform-origin: center;
-}
-
-.gate.selected {
-    transition: none;
-}
-
-/* Visual feedback for snap to grid */
-.gate.snapping::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border: 2px dashed var(--accent-secondary);
-    border-radius: 6px;
-    opacity: 0.5;
-    animation: dash 0.5s linear infinite;
-}
-
-@keyframes dash {
-    to {
-        stroke-dashoffset: -20;
-    }
 }

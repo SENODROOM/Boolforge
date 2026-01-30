@@ -2,82 +2,18 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boolforge</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boolforge - Logic Gate Simulator</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h2>Gate Library</h2>
-            <div class="gate-palette">
-                <button class="gate-btn" onclick="addGate('INPUT')">INPUT</button>
-                <button class="gate-btn" onclick="addGate('OUTPUT')">OUTPUT</button>
-                <button class="gate-btn" onclick="addGate('AND')">AND Gate</button>
-                <button class="gate-btn" onclick="addGate('OR')">OR Gate</button>
-                <button class="gate-btn" onclick="addGate('NOT')">NOT Gate</button>
-                <button class="gate-btn" onclick="addGate('NAND')">NAND Gate</button>
-                <button class="gate-btn" onclick="addGate('NOR')">NOR Gate</button>
-                <button class="gate-btn" onclick="addGate('XOR')">XOR Gate</button>
-                <button class="gate-btn" onclick="addGate('XNOR')">XNOR Gate</button>
-                <button class="gate-btn" onclick="addGate('BUFFER')">BUFFER Gate</button>
-            </div>
-
-            <div class="instructions">
-                <p><strong>Instructions:</strong></p>
-                <p>• Click gate buttons to add to canvas</p>
-                <p>• Drag gates to reposition</p>
-                <p>• Click output → input to create wire</p>
-                <p>• Click wire to delete it</p>
-                <p>• Toggle inputs to see results</p>
-                <p>• Right-click gate to delete</p>
-                <p>• Use OUTPUT gates for final results</p>
-                <p>• Save/load your circuits</p>
-            </div>
-        </div>
-
-        <div class="canvas-container" id="canvasContainer">
-            <canvas id="wireCanvas"></canvas>
-        </div>
-
-        <div class="truth-table-panel">
-            <h2>Truth Table</h2>
-
-            <div class="input-controls" id="inputControls">
-                <!-- Input toggles will be added here -->
-            </div>
-
-            <div class="output-display" id="outputDisplay">
-                <!-- Output states will be shown here -->
-            </div>
-
-            <div id="truthTableContainer">
-                <p style="color: var(--text-secondary); font-size: 12px;">Add INPUT and OUTPUT gates and connect them to
-                    see the truth table.</p>
-            </div>
-
-            <div class="controls">
-                <button class="btn" onclick="generateTruthTable()">Update Table</button>
-                <button class="btn" onclick="saveCircuit()">Save Circuit</button>
-                <button class="btn" onclick="loadCircuit()">Load Circuit</button>
-                <button class="btn danger" onclick="clearAll()">Clear All</button>
-            </div>
-
-            <div class="stats">
-                <div><span>Gates:</span> <strong id="gateCount">0</strong></div>
-                <div><span>Wires:</span> <strong id="wireCount">0</strong></div>
-                <div><span>Inputs:</span> <strong id="inputCount">0</strong></div>
-                <div><span>Outputs:</span> <strong id="outputCount">0</strong></div>
-            </div>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/main.jsx"></script>
 </body>
 
 </html>
