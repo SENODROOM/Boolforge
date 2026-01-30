@@ -135,7 +135,7 @@ function addGate(type) {
         type: type,
         x: 100 + Math.random() * 300,
         y: 100 + Math.random() * 300,
-        inputs: isInput ? 0 : (isNot ? 1 : 2),
+        inputs: isInput ? 0 : ((isNot || isOutput) ? 1 : 2),
         hasOutput: !isOutput,
         output: null,
         inputValues: isInput ? [false] : [],
