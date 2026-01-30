@@ -11,6 +11,13 @@ let connectingFrom = null;
 let gateIdCounter = 0;
 let wireIdCounter = 0;
 
+// Smooth drag and drop configuration
+const GRID_SIZE = 20;
+const SNAP_TO_GRID = true;
+const DRAG_SMOOTHING = 0.3;
+let targetX = 0;
+let targetY = 0;
+
 function resizeCanvas() {
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
@@ -19,6 +26,104 @@ function resizeCanvas() {
 
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+
+// Logic gate symbols as SVG paths
+const gateSymbols = {
+    'AND': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 10 10 L 10 50 L 40 50 Q 65 50 65 30 Q 65 10 40 10 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="38" x2="10" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="65" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'OR': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 10 10 Q 25 10 40 30 Q 25 50 10 50 Q 20 30 10 10 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M 40 30 Q 60 30 65 30" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="38" x2="10" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="65" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'NOT': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 10 15 L 10 45 L 55 30 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="60" cy="30" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="30" x2="10" y2="30" stroke="currentColor" stroke-width="2"/>
+            <line x1="65" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'NAND': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 10 10 L 10 50 L 40 50 Q 60 50 60 30 Q 60 10 40 10 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="65" cy="30" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="38" x2="10" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'NOR': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 10 10 Q 25 10 40 30 Q 25 50 10 50 Q 20 30 10 10 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M 40 30 Q 55 30 60 30" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="65" cy="30" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="38" x2="10" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'XOR': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 5 10 Q 15 30 5 50" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M 10 10 Q 25 10 40 30 Q 25 50 10 50 Q 20 30 10 10 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M 40 30 Q 60 30 65 30" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="38" x2="10" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="65" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'XNOR': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 5 10 Q 15 30 5 50" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M 10 10 Q 25 10 40 30 Q 25 50 10 50 Q 20 30 10 10 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M 40 30 Q 55 30 60 30" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="65" cy="30" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="22" x2="10" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="38" x2="10" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="70" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'BUFFER': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <path d="M 10 15 L 10 45 L 65 30 Z" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="30" x2="10" y2="30" stroke="currentColor" stroke-width="2"/>
+            <line x1="65" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'INPUT': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <rect x="15" y="20" width="50" height="20" rx="3" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="65" y1="30" x2="78" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `,
+    'OUTPUT': `
+        <svg viewBox="0 0 80 60" class="gate-symbol">
+            <rect x="15" y="20" width="50" height="20" rx="3" 
+                  fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="2" y1="30" x2="15" y2="30" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    `
+};
 
 function addGate(type) {
     const isInput = type === 'INPUT';
@@ -41,10 +146,17 @@ function addGate(type) {
 
     const gateEl = document.createElement('div');
     gateEl.className = 'gate' + (isOutput ? ' output-gate' : '');
+    
+    // Add gate symbol
+    const symbolHTML = gateSymbols[type] || '';
+    
     gateEl.innerHTML = `
-                <div class="gate-label">${type}</div>
-                <div style="font-size: 11px; color: var(--text-secondary);">ID: ${gate.id}</div>
-            `;
+        <div class="gate-content">
+            ${symbolHTML}
+            <div class="gate-label">${type}</div>
+            <div class="gate-id">ID: ${gate.id}</div>
+        </div>
+    `;
     gateEl.style.left = gate.x + 'px';
     gateEl.style.top = gate.y + 'px';
 
@@ -88,31 +200,91 @@ function addGate(type) {
     updateOutputDisplay();
 }
 
+function snapToGrid(value) {
+    return SNAP_TO_GRID ? Math.round(value / GRID_SIZE) * GRID_SIZE : value;
+}
+
 function startDrag(e, gate) {
     if (e.target.classList.contains('connection-point')) return;
+    
     selectedGate = gate;
     dragging = true;
     dragOffset.x = e.clientX - gate.x;
     dragOffset.y = e.clientY - gate.y;
+    
+    // Set initial target position
+    targetX = gate.x;
+    targetY = gate.y;
+    
     gate.element.classList.add('selected');
+    gate.element.style.cursor = 'grabbing';
+    
+    // Add visual feedback
+    gate.element.style.transform = 'scale(1.05)';
+    gate.element.style.zIndex = '1000';
 }
+
+// Smooth animation loop for dragging
+function smoothDrag() {
+    if (dragging && selectedGate) {
+        // Interpolate towards target position
+        const dx = targetX - selectedGate.x;
+        const dy = targetY - selectedGate.y;
+        
+        selectedGate.x += dx * DRAG_SMOOTHING;
+        selectedGate.y += dy * DRAG_SMOOTHING;
+        
+        selectedGate.element.style.left = selectedGate.x + 'px';
+        selectedGate.element.style.top = selectedGate.y + 'px';
+        
+        drawWires();
+    }
+    requestAnimationFrame(smoothDrag);
+}
+
+// Start the smooth drag animation loop
+smoothDrag();
 
 document.addEventListener('mousemove', (e) => {
     if (dragging && selectedGate) {
-        selectedGate.x = e.clientX - dragOffset.x;
-        selectedGate.y = e.clientY - dragOffset.y;
-        selectedGate.element.style.left = selectedGate.x + 'px';
-        selectedGate.element.style.top = selectedGate.y + 'px';
-        drawWires();
+        // Update target position with optional grid snapping
+        const rawX = e.clientX - dragOffset.x;
+        const rawY = e.clientY - dragOffset.y;
+        
+        // Constrain to canvas bounds
+        const bounds = container.getBoundingClientRect();
+        const maxX = bounds.width - selectedGate.element.offsetWidth;
+        const maxY = bounds.height - selectedGate.element.offsetHeight;
+        
+        targetX = snapToGrid(Math.max(0, Math.min(maxX, rawX)));
+        targetY = snapToGrid(Math.max(0, Math.min(maxY, rawY)));
+        
+        // Show snap guide if enabled
+        if (SNAP_TO_GRID) {
+            selectedGate.element.classList.add('snapping');
+        }
     }
 });
 
 document.addEventListener('mouseup', () => {
     if (selectedGate) {
         selectedGate.element.classList.remove('selected');
+        selectedGate.element.classList.remove('snapping');
+        selectedGate.element.style.cursor = 'move';
+        selectedGate.element.style.transform = 'scale(1)';
+        selectedGate.element.style.zIndex = '';
+        
+        // Final snap to grid
+        if (SNAP_TO_GRID) {
+            selectedGate.x = snapToGrid(selectedGate.x);
+            selectedGate.y = snapToGrid(selectedGate.y);
+            selectedGate.element.style.left = selectedGate.x + 'px';
+            selectedGate.element.style.top = selectedGate.y + 'px';
+        }
     }
     dragging = false;
     selectedGate = null;
+    drawWires();
 });
 
 function handleConnectionClick(gate, type, index) {
@@ -200,7 +372,7 @@ function isPointNearWire(x, y, wire) {
             Math.pow(t, 3) * toY;
 
         const dist = Math.sqrt(Math.pow(x - bezierX, 2) + Math.pow(y - bezierY, 2));
-        if (dist < 8) return true;
+        if (dist < 10) return true;
     }
     return false;
 }
@@ -243,27 +415,28 @@ function drawWires() {
 
 function evaluateGate(gate) {
     if (gate.type === 'INPUT') {
-        return gate.inputValues[0] || false;
+        return gate.inputValues[0];
     }
 
     const inputWires = wires.filter(w => w.to.id === gate.id);
-    const inputs = new Array(gate.inputs).fill(false);
+    const inputs = [];
 
-    inputWires.forEach(wire => {
-        inputs[wire.toIndex] = evaluateGate(wire.from);
-    });
+    for (let i = 0; i < gate.inputs; i++) {
+        const wire = inputWires.find(w => w.toIndex === i);
+        inputs[i] = wire ? evaluateGate(wire.from) : false;
+    }
 
     switch (gate.type) {
         case 'AND':
-            return inputs[0] && inputs[1];
+            return inputs.every(x => x);
         case 'OR':
-            return inputs[0] || inputs[1];
+            return inputs.some(x => x);
         case 'NOT':
             return !inputs[0];
         case 'NAND':
-            return !(inputs[0] && inputs[1]);
+            return !inputs.every(x => x);
         case 'NOR':
-            return !(inputs[0] || inputs[1]);
+            return !inputs.some(x => x);
         case 'XOR':
             return inputs[0] !== inputs[1];
         case 'XNOR':
@@ -280,57 +453,43 @@ function evaluateGate(gate) {
 function updateInputControls() {
     const inputGates = gates.filter(g => g.type === 'INPUT');
     const container = document.getElementById('inputControls');
-    container.innerHTML = '';
 
-    if (inputGates.length > 0) {
-        const title = document.createElement('h3');
-        title.textContent = 'INPUTS';
-        title.style.fontSize = '12px';
-        title.style.color = 'var(--accent-primary)';
-        title.style.marginBottom = '8px';
-        title.style.letterSpacing = '1px';
-        container.appendChild(title);
+    if (inputGates.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-secondary); font-size: 11px;">No INPUT gates added yet</p>';
+        return;
     }
 
-    inputGates.forEach(gate => {
-        const div = document.createElement('div');
-        div.className = 'input-toggle';
-        div.innerHTML = `
-                    <label>INPUT ${gate.id}</label>
-                    <div class="toggle-btn ${gate.inputValues[0] ? 'on' : ''}" onclick="toggleInput(${gate.id})"></div>
-                `;
-        container.appendChild(div);
-    });
+    container.innerHTML = inputGates.map(gate => `
+        <div class="input-toggle">
+            <label>${gate.label || 'Input ' + gate.id}</label>
+            <div class="toggle-btn ${gate.inputValues[0] ? 'on' : ''}" 
+                 onclick="toggleInput(${gate.id})">
+            </div>
+        </div>
+    `).join('');
 }
 
 function updateOutputDisplay() {
     const outputGates = gates.filter(g => g.type === 'OUTPUT');
     const container = document.getElementById('outputDisplay');
-    container.innerHTML = '';
 
-    if (outputGates.length > 0) {
-        const title = document.createElement('h3');
-        title.textContent = 'OUTPUTS';
-        container.appendChild(title);
-
-        outputGates.forEach(gate => {
-            const value = evaluateGate(gate);
-            const div = document.createElement('div');
-            div.className = 'output-item';
-            div.innerHTML = `
-                        <label>OUTPUT ${gate.id}</label>
-                        <div class="output-value ${value ? 'high' : 'low'}">${value ? '1' : '0'}</div>
-                    `;
-            container.appendChild(div);
-
-            // Update gate appearance
-            if (value) {
-                gate.element.classList.add('active');
-            } else {
-                gate.element.classList.remove('active');
-            }
-        });
+    if (outputGates.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-secondary); font-size: 11px;">No OUTPUT gates added yet</p>';
+        return;
     }
+
+    container.innerHTML = '<h3>Output States</h3>' + outputGates.map(gate => {
+        const value = evaluateGate(gate);
+        gate.element.classList.toggle('active', value);
+        return `
+            <div class="output-item">
+                <label>${gate.label || 'Output ' + gate.id}</label>
+                <div class="output-value ${value ? 'high' : 'low'}">
+                    ${value ? '1' : '0'}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function toggleInput(gateId) {
@@ -358,11 +517,11 @@ function generateTruthTable() {
     let tableHTML = '<table><thead><tr>';
 
     inputGates.forEach(g => {
-        tableHTML += `<th>IN ${g.id}</th>`;
+        tableHTML += `<th>${g.label || 'IN ' + g.id}</th>`;
     });
 
     outputGates.forEach(g => {
-        tableHTML += `<th>OUT ${g.id}</th>`;
+        tableHTML += `<th>${g.label || 'OUT ' + g.id}</th>`;
     });
 
     tableHTML += '</tr></thead><tbody>';
@@ -461,10 +620,16 @@ function loadCircuit() {
 
                     const gateEl = document.createElement('div');
                     gateEl.className = 'gate' + (isOutput ? ' output-gate' : '');
+                    
+                    const symbolHTML = gateSymbols[gData.type] || '';
+                    
                     gateEl.innerHTML = `
-                                <div class="gate-label">${gData.type}</div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">ID: ${gate.id}</div>
-                            `;
+                        <div class="gate-content">
+                            ${symbolHTML}
+                            <div class="gate-label">${gData.type}</div>
+                            <div class="gate-id">ID: ${gate.id}</div>
+                        </div>
+                    `;
                     gateEl.style.left = gate.x + 'px';
                     gateEl.style.top = gate.y + 'px';
 
