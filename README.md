@@ -75,14 +75,15 @@ npm run preview
 
 ## 🏗️ Project Structure
 
-    boolforge-react/
-    ├── Boolforge.jsx
-    ├── main.jsx
-    ├── index.html
-    ├── index-react.html
-    ├── package.json
-    ├── vite.config.js
-    └── README.md
+    Boolforge/
+    ├── public/
+    ├── src/
+    ├── .gitignore
+    ├── LICENSE
+    ├── README.md
+    ├── package-lock.json
+    └── package.json
+
 
 ------------------------------------------------------------------------
 
