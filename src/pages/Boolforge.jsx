@@ -598,14 +598,12 @@ const Boolforge = () => {
   };
 
   const clearCircuit = () => {
-    if (confirm('Clear all gates and wires?')) {
-      setGates([]);
-      setWires([]);
-      setGateIdCounter(0);
-      setWireIdCounter(0);
-      setHistory([]);
-      setHistoryIndex(-1);
-    }
+    setGates([]);
+    setWires([]);
+    setGateIdCounter(0);
+    setWireIdCounter(0);
+    setHistory([]);
+    setHistoryIndex(-1);
   };
 
   const truthTable = generateTruthTable();
