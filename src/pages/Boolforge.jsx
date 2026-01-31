@@ -10,6 +10,8 @@ const Boolforge = () => {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [gateIdCounter, setGateIdCounter] = useState(0);
   const [wireIdCounter, setWireIdCounter] = useState(0);
+  const [inputCounter, setInputCounter] = useState(0);
+  const [outputCounter, setOutputCounter] = useState(0);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -25,7 +27,9 @@ const Boolforge = () => {
       gates: JSON.parse(JSON.stringify(gates)),
       wires: JSON.parse(JSON.stringify(wires)),
       gateIdCounter,
-      wireIdCounter
+      wireIdCounter,
+      inputCounter,
+      outputCounter
     };
 
     setHistory(prev => {
@@ -34,12 +38,14 @@ const Boolforge = () => {
       return newHistory.slice(-50); // Keep last 50 states
     });
     setHistoryIndex(prev => Math.min(prev + 1, 49));
-  }, [gates, wires, gateIdCounter, wireIdCounter, historyIndex]);
+  }, [gates, wires, gateIdCounter, wireIdCounter, inputCounter, outputCounter, historyIndex]);
 
   const deleteGate = useCallback(
     (gate) => {
       setGates(prev => prev.filter(g => g.id !== gate.id));
       setWires(prev => prev.filter(w => w.fromId !== gate.id && w.toId !== gate.id));
+      if (gate.type === 'INPUT') setInputCounter(prev => Math.max(0, prev - 1));
+      if (gate.type === 'OUTPUT') setOutputCounter(prev => Math.max(0, prev - 1));
       setSelectedGate(null);
       saveToHistory();
     },
@@ -51,52 +57,75 @@ const Boolforge = () => {
     return SNAP_TO_GRID ? Math.round(value / GRID_SIZE) * GRID_SIZE : value;
   };
 
-  // Helper function to find gate by ID
-  const findGateById = useCallback((id) => {
-    return gates.find(g => g.id === id);
+  // Helper function to find gate by ID using Map for O(1) lookup
+  const gateMap = React.useMemo(() => {
+    const map = new Map();
+    gates.forEach(gate => map.set(gate.id, gate));
+    return map;
   }, [gates]);
 
-  const evaluateGate = useCallback((gate) => {
+  const evaluateGate = useCallback((gate, memo = new Map()) => {
     if (!gate) return false;
 
+    // Check memoization cache
+    if (memo.has(gate.id)) {
+      return memo.get(gate.id);
+    }
+
     if (gate.type === 'INPUT') {
-      return gate.inputValues[0] || false;
+      const result = gate.inputValues[0] || false;
+      memo.set(gate.id, result);
+      return result;
     }
 
     const inputs = [];
+
     wires.forEach(wire => {
       if (wire.toId === gate.id) {
-        const fromGate = findGateById(wire.fromId);
+        const fromGate = gateMap.get(wire.fromId);
         if (fromGate) {
-          const sourceOutput = evaluateGate(fromGate);
+          const sourceOutput = evaluateGate(fromGate, memo);
           inputs[wire.toIndex] = sourceOutput;
         }
       }
     });
 
+    let result = false;
     switch (gate.type) {
       case 'AND':
-        return inputs.length === 2 && inputs[0] && inputs[1];
+        result = inputs.length === 2 && inputs[0] && inputs[1];
+        break;
       case 'OR':
-        return inputs.length === 2 && (inputs[0] || inputs[1]);
+        result = inputs.length === 2 && (inputs[0] || inputs[1]);
+        break;
       case 'NOT':
-        return !inputs[0];
+        result = !inputs[0];
+        break;
       case 'NAND':
-        return !(inputs.length === 2 && inputs[0] && inputs[1]);
+        result = !(inputs.length === 2 && inputs[0] && inputs[1]);
+        break;
       case 'NOR':
-        return !(inputs.length === 2 && (inputs[0] || inputs[1]));
+        result = !(inputs.length === 2 && (inputs[0] || inputs[1]));
+        break;
       case 'XOR':
-        return inputs.length === 2 && (inputs[0] !== inputs[1]);
+        result = inputs.length === 2 && (inputs[0] !== inputs[1]);
+        break;
       case 'XNOR':
-        return inputs.length === 2 && (inputs[0] === inputs[1]);
+        result = inputs.length === 2 && (inputs[0] === inputs[1]);
+        break;
       case 'BUFFER':
-        return inputs[0] || false;
+        result = inputs[0] || false;
+        break;
       case 'OUTPUT':
-        return inputs[0] || false;
+        result = inputs[0] || false;
+        break;
       default:
-        return false;
+        result = false;
     }
-  }, [wires, findGateById]);
+
+    memo.set(gate.id, result);
+    return result;
+  }, [wires, gateMap]);
 
   // Enhanced wire drawing with smooth bezier curves
   const drawWires = useCallback(() => {
@@ -106,9 +135,11 @@ const Boolforge = () => {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    const memo = new Map(); // Shared memoization cache for all evaluations
+
     wires.forEach(wire => {
-      const fromGate = findGateById(wire.fromId);
-      const toGate = findGateById(wire.toId);
+      const fromGate = gateMap.get(wire.fromId);
+      const toGate = gateMap.get(wire.toId);
 
       if (!fromGate || !toGate) return;
 
@@ -120,7 +151,7 @@ const Boolforge = () => {
       const toX = toGate.x;
       const toY = toGate.y + (toInputCount === 1 ? 50 : (wire.toIndex === 0 ? 35 : 65));
 
-      const isActive = evaluateGate(fromGate);
+      const isActive = evaluateGate(fromGate, memo);
 
       // Set wire appearance
       ctx.strokeStyle = isActive ? '#00ff88' : '#334155';
@@ -149,7 +180,7 @@ const Boolforge = () => {
       ctx.stroke();
       ctx.shadowBlur = 0;
     });
-  }, [wires, findGateById, evaluateGate]);
+  }, [wires, gateMap, evaluateGate]);
 
   // Continuous rendering loop for smooth wire updates
   useEffect(() => {
@@ -196,6 +227,8 @@ const Boolforge = () => {
       setWires(JSON.parse(JSON.stringify(state.wires)));
       setGateIdCounter(state.gateIdCounter);
       setWireIdCounter(state.wireIdCounter);
+      setInputCounter(state.inputCounter || 0);
+      setOutputCounter(state.outputCounter || 0);
       setHistoryIndex(newIndex);
     }
   }, [history, historyIndex]);
@@ -208,6 +241,8 @@ const Boolforge = () => {
       setWires(JSON.parse(JSON.stringify(state.wires)));
       setGateIdCounter(state.gateIdCounter);
       setWireIdCounter(state.wireIdCounter);
+      setInputCounter(state.inputCounter || 0);
+      setOutputCounter(state.outputCounter || 0);
       setHistoryIndex(newIndex);
     }
   }, [history, historyIndex]);
@@ -238,6 +273,20 @@ const Boolforge = () => {
     const isOutput = type === 'OUTPUT';
     const isNot = type === 'NOT' || type === 'BUFFER';
 
+    // Generate labels for inputs and outputs using counters
+    let label = null;
+    if (type === 'INPUT') {
+      const baseIndex = inputCounter % 13; // A-M (13 letters)
+      const suffix = Math.floor(inputCounter / 13);
+      const baseLetter = String.fromCharCode(65 + baseIndex); // A=65, B=66, ..., M=77
+      label = suffix === 0 ? baseLetter : `${baseLetter}${suffix + 1}`;
+    } else if (type === 'OUTPUT') {
+      const baseIndex = outputCounter % 13; // Z-N (13 letters)
+      const suffix = Math.floor(outputCounter / 13);
+      const baseLetter = String.fromCharCode(90 - baseIndex); // Z=90, Y=89, ..., N=78
+      label = suffix === 0 ? baseLetter : `${baseLetter}${suffix + 1}`;
+    }
+
     const newGate = {
       id: gateIdCounter,
       type: type,
@@ -247,12 +296,13 @@ const Boolforge = () => {
       hasOutput: !isOutput,
       output: null,
       inputValues: isInput ? [false] : [],
-      label: type === 'INPUT' ? `IN_${gateIdCounter}` :
-        type === 'OUTPUT' ? `OUT_${gateIdCounter}` : null
+      label: label
     };
 
     setGates(prev => [...prev, newGate]);
     setGateIdCounter(prev => prev + 1);
+    if (isInput) setInputCounter(prev => prev + 1);
+    if (isOutput) setOutputCounter(prev => prev + 1);
     saveToHistory();
   };
 
@@ -333,8 +383,8 @@ const Boolforge = () => {
     const y = e.clientY - rect.top;
 
     for (const wire of wires) {
-      const fromGate = findGateById(wire.fromId);
-      const toGate = findGateById(wire.toId);
+      const fromGate = gateMap.get(wire.fromId);
+      const toGate = gateMap.get(wire.toId);
 
       if (!fromGate || !toGate) continue;
 
@@ -475,7 +525,9 @@ const Boolforge = () => {
       gates: gates,
       wires: wires,
       gateIdCounter,
-      wireIdCounter
+      wireIdCounter,
+      inputCounter,
+      outputCounter
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -499,6 +551,8 @@ const Boolforge = () => {
         setWires(data.wires || []);
         setGateIdCounter(data.gateIdCounter || 0);
         setWireIdCounter(data.wireIdCounter || 0);
+        setInputCounter(data.inputCounter || 0);
+        setOutputCounter(data.outputCounter || 0);
         saveToHistory();
       } catch (error) {
         alert('Error loading circuit file');
@@ -512,13 +566,15 @@ const Boolforge = () => {
     setWires([]);
     setGateIdCounter(0);
     setWireIdCounter(0);
+    setInputCounter(0);
+    setOutputCounter(0);
     setHistory([]);
     setHistoryIndex(-1);
   };
 
-  const truthTable = generateTruthTable();
-  const inputGates = gates.filter(g => g.type === 'INPUT');
-  const outputGates = gates.filter(g => g.type === 'OUTPUT');
+  const inputGates = React.useMemo(() => gates.filter(g => g.type === 'INPUT'), [gates]);
+  const outputGates = React.useMemo(() => gates.filter(g => g.type === 'OUTPUT'), [gates]);
+  const truthTable = React.useMemo(() => generateTruthTable(), [gates, wires]);
 
   return (
     <div className="container"
