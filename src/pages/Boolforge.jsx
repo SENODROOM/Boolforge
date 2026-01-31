@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { gateSymbols } from '../data/gates';
+import { TruthTableGenerator } from '../components/TruthTable';
 
 const Boolforge = () => {
   const [gates, setGates] = useState([]);
@@ -690,29 +691,7 @@ const Boolforge = () => {
           </div>
         )}
 
-        {truthTable.headers.length > 0 && (
-          <>
-            <h2 style={{ marginTop: '20px' }}>Truth Table</h2>
-            <table>
-              <thead>
-                <tr>
-                  {truthTable.headers.map((header, i) => (
-                    <th key={i}>{header}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {truthTable.rows.map((row, i) => (
-                  <tr key={i}>
-                    {row.map((cell, j) => (
-                      <td key={j}>{cell}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
+        <TruthTableGenerator truthTable={truthTable} />
 
         <div className="controls">
           <button className="btn" onClick={undo} disabled={historyIndex <= 0}>
@@ -741,8 +720,6 @@ const Boolforge = () => {
           <div><span>Outputs:</span> <strong>{outputGates.length}</strong></div>
         </div>
       </div>
-
-
     </div>
   );
 };
