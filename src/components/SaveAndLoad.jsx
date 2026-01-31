@@ -67,7 +67,7 @@ export function SaveAndLoad({
     return (
         <>
             <button
-                className="logic-circuit-project-manager-primary-action-button"
+                className="logic-circuit-project-manager-primary-action-button first"
                 onClick={() => setShowSave(true)}
             >
                 Save Project

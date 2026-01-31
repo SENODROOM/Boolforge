@@ -896,6 +896,9 @@ td:hover {
 
 /* ===== Primary Action Button ===== */
 
+.logic-circuit-project-manager-primary-action-button.first {
+    margin-top: 20px;
+}
 
 .logic-circuit-project-manager-primary-action-button {
     width: 100%;
