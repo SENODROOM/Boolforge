@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { gateSymbols } from '../data/gates';
 import { TruthTableGenerator } from '../components/TruthTable';
+import { SaveAndLoad } from '../components/SaveAndLoad';
 
 const Boolforge = () => {
   const [gates, setGates] = useState([]);
@@ -521,46 +522,7 @@ const Boolforge = () => {
     return { headers, rows };
   }, [gates, evaluateGateWithGates]);
 
-  const saveCircuit = () => {
-    const data = {
-      gates: gates,
-      wires: wires,
-      gateIdCounter,
-      wireIdCounter,
-      inputCounter,
-      outputCounter
-    };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'circuit.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const loadCircuit = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = JSON.parse(event.target.result);
-        setGates(data.gates || []);
-        setWires(data.wires || []);
-        setGateIdCounter(data.gateIdCounter || 0);
-        setWireIdCounter(data.wireIdCounter || 0);
-        setInputCounter(data.inputCounter || 0);
-        setOutputCounter(data.outputCounter || 0);
-        saveToHistory();
-      } catch (error) {
-        alert('Error loading circuit file');
-      }
-    };
-    reader.readAsText(file);
-  };
 
   const clearCircuit = () => {
     setGates([]);
@@ -700,16 +662,23 @@ const Boolforge = () => {
           <button className="btn" onClick={redo} disabled={historyIndex >= history.length - 1}>
             ↷ Redo
           </button>
-          <button className="btn" onClick={saveCircuit}>💾 Save Circuit</button>
-          <label className="btn" style={{ cursor: 'pointer', textAlign: 'center' }}>
-            📂 Load Circuit
-            <input
-              type="file"
-              accept=".json"
-              onChange={loadCircuit}
-              style={{ display: 'none' }}
-            />
-          </label>
+          <SaveAndLoad
+            data={{
+              gates,
+              wires,
+              gateIdCounter,
+              wireIdCounter,
+              inputCounter,
+              outputCounter
+            }}
+            setGates={setGates}
+            setWires={setWires}
+            setGateIdCounter={setGateIdCounter}
+            setWireIdCounter={setWireIdCounter}
+            setInputCounter={setInputCounter}
+            setOutputCounter={setOutputCounter}
+            saveToHistory={saveToHistory}
+          />
           <button className="btn danger" onClick={clearCircuit}>🗑️ Clear All</button>
         </div>
 

@@ -799,3 +799,251 @@ td:hover {
 .tt-table td:contains("0") {
     color: var(--text-secondary);
 }
+
+
+
+/* ================================================= */
+/* =============== Save and Load =================== */
+/* ================================================= */
+/* ===== Overlay ===== */
+
+.logic-circuit-project-manager-fullscreen-overlay-background-container {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6000;
+    animation: projectManagerFadeIn 0.35s ease-out;
+}
+
+/* ===== Modal ===== */
+
+.logic-circuit-project-manager-modal-window-card-container {
+    background: var(--bg-medium);
+    border-radius: 24px;
+    padding: 36px;
+    width: min(520px, 90vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(0, 255, 136, 0.25);
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(0, 255, 136, 0.12) inset,
+        0 8px 32px rgba(0, 255, 136, 0.15);
+    animation: projectManagerSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Custom scrollbar for the modal (if project list is long) */
+.logic-circuit-project-manager-modal-window-card-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.logic-circuit-project-manager-modal-window-card-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.logic-circuit-project-manager-modal-window-card-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 136, 0.4);
+    border-radius: 4px;
+}
+
+.logic-circuit-project-manager-modal-window-card-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
+/* ===== Title ===== */
+
+.logic-circuit-project-manager-modal-title-text-heading {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: var(--accent-primary);
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+}
+
+/* ===== Input ===== */
+
+.logic-circuit-project-manager-project-name-text-input-field {
+    width: 100%;
+    padding: 16px;
+    background: var(--bg-light);
+    border: 2px solid transparent;
+    color: white;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) inset;
+    margin-bottom: 20px;
+}
+
+.logic-circuit-project-manager-project-name-text-input-field::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.logic-circuit-project-manager-project-name-text-input-field:focus {
+    border-color: var(--accent-primary);
+    box-shadow:
+        0 0 20px rgba(0, 255, 136, 0.5),
+        0 4px 12px rgba(0, 0, 0, 0.2) inset;
+    outline: none;
+    transform: translateY(-2px);
+}
+
+/* ===== Primary Action Button ===== */
+
+
+.logic-circuit-project-manager-primary-action-button {
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 14px;
+    border: 2px solid var(--accent-primary);
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), transparent);
+    color: var(--accent-primary);
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logic-circuit-project-manager-primary-action-button:hover {
+    background: var(--accent-primary);
+    color: #000;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 255, 136, 0.5);
+}
+
+.logic-circuit-project-manager-primary-action-button:active {
+    transform: translateY(-1px);
+}
+
+/* ===== Confirm / Cancel Buttons ===== */
+.logic-circuit-project-manager-modal-button-row-layout-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logic-circuit-project-manager-modal-button-row-layout-wrapper button {
+    margin: 5px 50px;
+}
+
+.logic-circuit-project-manager-confirm-save-button {
+    flex: 1;
+    padding: 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-primary), #00b86e);
+    color: #000;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logic-circuit-project-manager-confirm-save-button:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.7);
+}
+
+.logic-circuit-project-manager-cancel-close-button {
+    flex: 1;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--accent-danger);
+    color: white;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logic-circuit-project-manager-cancel-close-button:hover {
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 0 28px rgba(255, 51, 102, 0.7);
+    background: #ff1a57;
+}
+
+/* ===== Project Rows ===== */
+
+.logic-circuit-project-manager-project-row-item-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--bg-light);
+    margin-bottom: 12px;
+    border: 1px solid rgba(0, 255, 136, 0.1);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.logic-circuit-project-manager-project-row-item-container:hover {
+    background: rgba(0, 255, 136, 0.12);
+    border-color: rgba(0, 255, 136, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 255, 136, 0.25);
+}
+
+/* ===== Small Buttons ===== */
+
+.logic-circuit-project-manager-small-load-button {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1.5px solid var(--accent-secondary);
+    background: transparent;
+    color: var(--accent-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-right: 15px;
+}
+
+.logic-circuit-project-manager-small-load-button:hover {
+    background: var(--accent-secondary);
+    color: #000;
+}
+
+.logic-circuit-project-manager-small-delete-button {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1.5px solid var(--accent-danger);
+    background: transparent;
+    color: var(--accent-danger);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.logic-circuit-project-manager-small-delete-button:hover {
+    background: var(--accent-danger);
+    color: white;
+}
+
+/* ===== Animations ===== */
+
+@keyframes projectManagerFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes projectManagerSlideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
