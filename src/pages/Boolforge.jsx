@@ -438,47 +438,7 @@ const Boolforge = () => {
     ));
   };
 
-  const generateTruthTable = () => {
-    const inputs = gates.filter(g => g.type === 'INPUT');
-    const outputs = gates.filter(g => g.type === 'OUTPUT');
-
-    if (inputs.length === 0 || outputs.length === 0) {
-      return { headers: [], rows: [] };
-    }
-
-    const numCombinations = Math.pow(2, inputs.length);
-    const rows = [];
-
-    for (let i = 0; i < numCombinations; i++) {
-      const inputValues = inputs.map((_, index) => {
-        return (i >> (inputs.length - 1 - index)) & 1 ? true : false;
-      });
-
-      const tempGates = gates.map(g => {
-        if (g.type === 'INPUT') {
-          const index = inputs.findIndex(inp => inp.id === g.id);
-          return { ...g, inputValues: [inputValues[index]] };
-        }
-        return g;
-      });
-
-      const outputValues = outputs.map(outGate => {
-        const gate = tempGates.find(g => g.id === outGate.id);
-        return evaluateGateWithGates(gate, tempGates) ? 1 : 0;
-      });
-
-      rows.push([...inputValues.map(v => v ? 1 : 0), ...outputValues]);
-    }
-
-    const headers = [
-      ...inputs.map(g => g.label),
-      ...outputs.map(g => g.label)
-    ];
-
-    return { headers, rows };
-  };
-
-  const evaluateGateWithGates = (gate, gatesList) => {
+  const evaluateGateWithGates = useCallback((gate, gatesList) => {
     if (!gate) return false;
 
     if (gate.type === 'INPUT') {
@@ -518,7 +478,47 @@ const Boolforge = () => {
       default:
         return false;
     }
-  };
+  }, [wires]);
+
+  const generateTruthTable = useCallback(() => {
+    const inputs = gates.filter(g => g.type === 'INPUT');
+    const outputs = gates.filter(g => g.type === 'OUTPUT');
+
+    if (inputs.length === 0 || outputs.length === 0) {
+      return { headers: [], rows: [] };
+    }
+
+    const numCombinations = Math.pow(2, inputs.length);
+    const rows = [];
+
+    for (let i = 0; i < numCombinations; i++) {
+      const inputValues = inputs.map((_, index) => {
+        return (i >> (inputs.length - 1 - index)) & 1 ? true : false;
+      });
+
+      const tempGates = gates.map(g => {
+        if (g.type === 'INPUT') {
+          const index = inputs.findIndex(inp => inp.id === g.id);
+          return { ...g, inputValues: [inputValues[index]] };
+        }
+        return g;
+      });
+
+      const outputValues = outputs.map(outGate => {
+        const gate = tempGates.find(g => g.id === outGate.id);
+        return evaluateGateWithGates(gate, tempGates) ? 1 : 0;
+      });
+
+      rows.push([...inputValues.map(v => v ? 1 : 0), ...outputValues]);
+    }
+
+    const headers = [
+      ...inputs.map(g => g.label),
+      ...outputs.map(g => g.label)
+    ];
+
+    return { headers, rows };
+  }, [gates, evaluateGateWithGates]);
 
   const saveCircuit = () => {
     const data = {
@@ -574,7 +574,7 @@ const Boolforge = () => {
 
   const inputGates = React.useMemo(() => gates.filter(g => g.type === 'INPUT'), [gates]);
   const outputGates = React.useMemo(() => gates.filter(g => g.type === 'OUTPUT'), [gates]);
-  const truthTable = React.useMemo(() => generateTruthTable(), [gates, wires]);
+  const truthTable = React.useMemo(() => generateTruthTable(), [generateTruthTable]);
 
   return (
     <div className="container"
