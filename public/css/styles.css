@@ -1024,6 +1024,10 @@ td:hover {
     color: white;
 }
 
+.logic-circuit-project-manager-empty-projects-placeholder-message {
+    margin-bottom: 20px;
+}
+
 /* ===== Animations ===== */
 
 @keyframes projectManagerFadeIn {
