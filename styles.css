@@ -118,7 +118,6 @@ canvas {
     top: 0;
     left: 0;
     cursor: crosshair;
-    pointer-events: none;
 }
 
 .gate {
@@ -327,14 +326,19 @@ td:hover {
     border-radius: 2px;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
     background: var(--accent-primary);
     color: var(--bg-dark);
     box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
     transform: translateY(-2px);
 }
 
-.btn:active {
+.btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.btn:active:not(:disabled) {
     transform: translateY(0);
 }
 
