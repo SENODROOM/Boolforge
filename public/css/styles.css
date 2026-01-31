@@ -584,3 +584,218 @@ td:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-secondary);
 }
+
+
+
+/* ================================================= */
+/* =========== TRUTH TABLE (TruthTable.jsx) ======== */
+/* ================================================= */
+/* ===== Button ===== */
+
+.tt-button {
+    padding: 12px 26px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+
+    background: linear-gradient(135deg,
+            var(--accent-primary),
+            var(--accent-secondary));
+    color: #001b12;
+
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(0, 255, 136, 0.25);
+}
+
+.tt-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 255, 136, 0.45);
+}
+
+.tt-button:active {
+    transform: translateY(0);
+}
+
+
+/* ===== Overlay ===== */
+
+.tt-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 1000;
+    padding: 24px;
+
+    animation: ttFadeIn 0.25s ease;
+}
+
+@keyframes ttFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* ===== Modal ===== */
+
+.tt-modal {
+    background: var(--bg-medium);
+    border-radius: 16px;
+    padding: 28px 30px;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 90vh;
+    overflow: auto;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(0, 255, 136, 0.08) inset;
+
+    position: relative;
+
+    animation: ttSlideUp 0.3s ease;
+}
+
+@keyframes ttSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+
+/* ===== Close Button ===== */
+
+.tt-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+
+    background: var(--bg-light);
+    color: var(--text-secondary);
+
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.tt-close:hover {
+    background: var(--accent-danger);
+    color: white;
+    transform: scale(1.1);
+}
+
+
+/* ===== Title ===== */
+
+.tt-title {
+    margin: 0 0 22px 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+
+    color: var(--text-primary);
+}
+
+
+/* ===== Table Wrapper ===== */
+
+.tt-table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+/* ===== Table ===== */
+
+.tt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: var(--bg-dark);
+}
+
+
+/* Header */
+
+.tt-table thead th {
+    padding: 14px 18px;
+    text-align: center;
+    font-weight: 700;
+
+    background: var(--bg-light);
+    color: var(--accent-secondary);
+
+    border-bottom: 1px solid var(--grid-color);
+    border-right: 1px solid var(--grid-color);
+
+    letter-spacing: 0.4px;
+}
+
+
+/* Cells */
+
+.tt-table td {
+    padding: 12px 18px;
+    text-align: center;
+    color: var(--text-primary);
+
+    border-right: 1px solid var(--grid-color);
+    border-bottom: 1px solid var(--grid-color);
+}
+
+
+/* Row striping */
+
+.tt-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+
+/* Hover highlight */
+
+.tt-table tbody tr:hover {
+    background: rgba(0, 255, 136, 0.08);
+    transition: background 0.15s ease;
+}
+
+
+/* Logic value styling (optional enhancement) */
+
+.tt-table td {
+    font-weight: 600;
+}
+
+.tt-table td:contains("1") {
+    color: var(--wire-on);
+}
+
+.tt-table td:contains("0") {
+    color: var(--text-secondary);
+}
