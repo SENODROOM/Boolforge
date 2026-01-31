@@ -19,6 +19,31 @@ const Boolforge = () => {
   const GRID_SIZE = 20;
   const SNAP_TO_GRID = true;
 
+  const saveToHistory = useCallback(() => {
+    const state = {
+      gates: JSON.parse(JSON.stringify(gates)),
+      wires: JSON.parse(JSON.stringify(wires)),
+      gateIdCounter,
+      wireIdCounter
+    };
+
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      newHistory.push(state);
+      return newHistory.slice(-50); // Keep last 50 states
+    });
+    setHistoryIndex(prev => Math.min(prev + 1, 49));
+  }, [gates, wires, gateIdCounter, wireIdCounter, historyIndex]);
+
+  const deleteGate = useCallback(
+    (gate) => {
+      setGates(prev => prev.filter(g => g.id !== gate.id));
+      setWires(prev => prev.filter(w => w.fromId !== gate.id && w.toId !== gate.id));
+      setSelectedGate(null);
+      saveToHistory();
+    },
+    [setGates, setWires, setSelectedGate, saveToHistory] // dependencies
+  );
   // Gate symbols as SVG components
   const gateSymbols = {
     'AND': (
@@ -256,21 +281,7 @@ const Boolforge = () => {
     };
   }, [drawWires]);
 
-  const saveToHistory = useCallback(() => {
-    const state = {
-      gates: JSON.parse(JSON.stringify(gates)),
-      wires: JSON.parse(JSON.stringify(wires)),
-      gateIdCounter,
-      wireIdCounter
-    };
 
-    setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
-      newHistory.push(state);
-      return newHistory.slice(-50); // Keep last 50 states
-    });
-    setHistoryIndex(prev => Math.min(prev + 1, 49));
-  }, [gates, wires, gateIdCounter, wireIdCounter, historyIndex]);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -301,7 +312,7 @@ const Boolforge = () => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         undo();
-      } else if ((e.ctrlKey || e.metaKey) && (e.shiftKey && e.key === 'z' || e.key === 'y')) {
+      } else if ((e.ctrlKey || e.metaKey) && ((e.shiftKey && e.key === 'z') || e.key === 'y')) {
         e.preventDefault();
         redo();
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -315,7 +326,7 @@ const Boolforge = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedGate, dragging, undo, redo]);
+  }, [selectedGate, dragging, undo, redo, deleteGate]);
 
   const addGate = (type) => {
     const isInput = type === 'INPUT';
@@ -370,12 +381,6 @@ const Boolforge = () => {
     setSelectedGate(null);
   };
 
-  const deleteGate = (gate) => {
-    setGates(prev => prev.filter(g => g.id !== gate.id));
-    setWires(prev => prev.filter(w => w.fromId !== gate.id && w.toId !== gate.id));
-    setSelectedGate(null);
-    saveToHistory();
-  };
 
   const startConnection = (gate) => {
     if (gate.hasOutput) {
