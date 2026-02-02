@@ -540,7 +540,7 @@ const Boolforge = () => {
   const truthTable = React.useMemo(() => generateTruthTable(), [generateTruthTable]);
 
   return (
-    <div className="container"
+    <div className="container circuit-maker"
       onMouseMove={onDrag}
       onMouseUp={stopDrag}
     >

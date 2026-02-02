@@ -6,6 +6,7 @@ import Boolforge from './pages/Boolforge';
 
 // UTILS:
 import ScrollToTop from './utils/ScrollToTop';
+import NumberConverter from './pages/NumberConversation';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Boolforge />} />
+          <Route path="/numberconversation" element={<NumberConverter />} />
         </Routes>
       </BrowserRouter>
     </>
