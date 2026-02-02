@@ -2260,3 +2260,292 @@ td:hover {
     color: var(--accent-danger);
     text-align: center;
 }
+
+
+
+.ch1-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 100%);
+    padding: 2rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    color: var(--text-primary);
+}
+
+.ch1-header {
+    background: var(--bg-medium);
+    border-radius: var(--border-radius);
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    box-shadow: var(--shadow-soft), var(--glow-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ch1-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+}
+
+.ch1-header-content {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.ch1-icon-wrapper {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--glow-primary);
+}
+
+.ch1-main-icon {
+    color: var(--bg-dark);
+}
+
+.ch1-main-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ch1-subtitle {
+    margin: 0.5rem 0 0 0;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.ch1-binary-decoration {
+    color: var(--accent-primary);
+    opacity: 0.3;
+    animation: ch1-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ch1-pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+.ch1-problems-grid {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.ch1-problem-card {
+    background: var(--bg-medium);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--grid-color);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.ch1-problem-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-hard), var(--glow-primary);
+    transform: translateY(-2px);
+}
+
+.ch1-problem-header {
+    width: 100%;
+    padding: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+    transition: var(--transition);
+}
+
+.ch1-problem-header:hover {
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.ch1-problem-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ch1-problem-number {
+    font-size: 0.875rem;
+    color: var(--accent-primary);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.ch1-category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(0, 255, 136, 0.1);
+    border: 1px solid var(--accent-primary);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.ch1-problem-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.ch1-chevron {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-primary);
+    transition: transform 0.3s ease;
+}
+
+.ch1-chevron.ch1-expanded {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.ch1-problem-content {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--grid-color);
+}
+
+.ch1-question-section,
+.ch1-solution-section {
+    margin-top: 1.5rem;
+}
+
+.ch1-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--accent-secondary);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+}
+
+.ch1-question-text {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.ch1-solution-content {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border-left: 4px solid var(--accent-primary);
+}
+
+.ch1-solution-text {
+    color: var(--text-primary);
+    line-height: 1.7;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.ch1-subsection {
+    margin-bottom: 2rem;
+}
+
+.ch1-subsection-title {
+    font-size: 1rem;
+    color: var(--accent-primary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.ch1-scenario {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(0, 255, 136, 0.03);
+    border-radius: 6px;
+    border-left: 3px solid var(--accent-primary);
+}
+
+.ch1-scenario-title {
+    color: var(--accent-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.ch1-waveform-box {
+    margin-top: 0.75rem;
+    background: var(--bg-dark);
+    padding: 1rem;
+    border-radius: 4px;
+    border: 1px solid var(--grid-color);
+}
+
+.ch1-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.ch1-waveform {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-primary);
+    margin: 0;
+    white-space: pre;
+    overflow-x: auto;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .ch1-container {
+        padding: 1rem;
+    }
+
+    .ch1-header {
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .ch1-main-title {
+        font-size: 1.75rem;
+    }
+
+    .ch1-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .ch1-problem-header {
+        padding: 1rem;
+    }
+
+    .ch1-chevron {
+        right: 1rem;
+    }
+}
