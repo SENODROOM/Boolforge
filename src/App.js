@@ -10,6 +10,8 @@ import NumberConverter from './pages/NumberConversation';
 import NumberSystemCalculator from './pages/NumberSystemCalculator';
 import BinaryRepresentation from './pages/BinaryRepresentation';
 import ProblemSolver from './pages/Book/Ch1';
+import BitConverter from './pages/Bitconverter';
+import ParityBitCalculator from './pages/ParityBitCalculator';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
           <Route path="/numbersystemcalculator" element={<NumberSystemCalculator />} />
           <Route path="/binaryrepresentation" element={<BinaryRepresentation />} />
           <Route path="/book" element={<ProblemSolver />} />
+          <Route path="/paritybitcalculator" element={<ParityBitCalculator />} />
+          <Route path="/bitconvertor" element={<BitConverter />} />
         </Routes>
       </BrowserRouter>
     </>
