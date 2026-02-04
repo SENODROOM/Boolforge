@@ -7,7 +7,6 @@ export default function BitConverter() {
     const [result, setResult] = useState('');
     const [showTable, setShowTable] = useState(false);
 
-    // Conversion factors to bits
     const units = {
         'bit': { toBits: 1, power: 0, label: 'Bit', category: 'base' },
         'B': { toBits: 8, power: 3, label: 'Byte', category: 'byte' },
@@ -45,7 +44,6 @@ export default function BitConverter() {
         return num.toLocaleString('en-US');
     };
 
-    // Generate table data
     const tableData = [
         { unit: 'Bit', symbol: 'bit', power: 0, bits: 1, category: 'base' },
         { unit: 'Byte', symbol: 'B', power: 3, bits: 8, category: 'base' },
@@ -73,7 +71,6 @@ export default function BitConverter() {
                 <h1 className="binary-main-title">Bit & Byte Converter</h1>
                 <p className="binary-subtitle">Convert between digital storage units with precision</p>
 
-                {/* ================= CONVERTER SECTION ================= */}
                 <section className="binary-card">
                     <h2 className="binary-section-title binary-title-primary">
                         <span className="binary-dot binary-dot-primary"></span>
@@ -87,12 +84,10 @@ export default function BitConverter() {
                             then choose the <span className="binary-highlight-primary">target unit</span> for conversion.
                         </p>
 
-                        <div style={{ marginTop: '20px' }}>
-                            <h4 style={{ color: 'var(--text-primary)', marginBottom: '10px' }}>
-                                Quick Reference:
-                            </h4>
-                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px' }}>
-                                <ul className="binary-list" style={{ margin: 0, paddingLeft: '20px' }}>
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">Quick Reference:</h4>
+                            <div className="binary-example-box">
+                                <ul className="binary-list">
                                     <li><strong>1 Byte</strong> = 8 bits</li>
                                     <li><strong>Binary units</strong> use 1024 (2<sup>10</sup>) as base</li>
                                     <li><strong>Decimal units</strong> use 1000 (10<sup>3</sup>) as base</li>
@@ -102,25 +97,17 @@ export default function BitConverter() {
                         </div>
                     </div>
 
-                    {/* Converter Controls */}
-                    <h3 className="binary-info-heading" style={{ fontSize: '1.1rem', marginTop: '30px' }}>
-                        Convert Your Value
-                    </h3>
+                    <h3 className="binary-info-heading">Convert Your Value</h3>
 
                     <div className="binary-controls-grid">
                         <div className="binary-input-group">
                             <label className="binary-label">From Unit</label>
                             <select
-                                className="binary-input-field binary-input-primary"
+                                className="binary-input-field binary-input-primary binary-select"
                                 value={fromUnit}
                                 onChange={(e) => setFromUnit(e.target.value)}
-                                style={{
-                                    padding: '12px',
-                                    fontSize: '1rem',
-                                    cursor: 'pointer'
-                                }}
                             >
-                                <optgroup label="Bytes" style={{ background: 'var(--bg-medium)', color: 'var(--accent-primary)' }}>
+                                <optgroup label="Bytes">
                                     <option value="B">Byte (B)</option>
                                     <option value="KB">Kilobyte (KB)</option>
                                     <option value="MB">Megabyte (MB)</option>
@@ -128,7 +115,7 @@ export default function BitConverter() {
                                     <option value="TB">Terabyte (TB)</option>
                                     <option value="PB">Petabyte (PB)</option>
                                 </optgroup>
-                                <optgroup label="Bits" style={{ background: 'var(--bg-medium)', color: 'var(--accent-primary)' }}>
+                                <optgroup label="Bits">
                                     <option value="bit">Bit</option>
                                     <option value="Kib">Kibibit (Kib)</option>
                                     <option value="Mib">Mebibit (Mib)</option>
@@ -147,25 +134,17 @@ export default function BitConverter() {
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
                                 placeholder="Enter value..."
-                                style={{ fontSize: '1rem' }}
                             />
                         </div>
-                    </div>
 
-                    <div className="binary-controls-grid" style={{ marginTop: '15px' }}>
                         <div className="binary-input-group">
                             <label className="binary-label">To Unit</label>
                             <select
-                                className="binary-input-field binary-input-primary"
+                                className="binary-input-field binary-input-primary binary-select"
                                 value={toUnit}
                                 onChange={(e) => setToUnit(e.target.value)}
-                                style={{
-                                    padding: '12px',
-                                    fontSize: '1rem',
-                                    cursor: 'pointer'
-                                }}
                             >
-                                <optgroup label="Bytes" style={{ background: 'var(--bg-medium)', color: 'var(--accent-primary)' }}>
+                                <optgroup label="Bytes">
                                     <option value="B">Byte (B)</option>
                                     <option value="KB">Kilobyte (KB)</option>
                                     <option value="MB">Megabyte (MB)</option>
@@ -173,7 +152,7 @@ export default function BitConverter() {
                                     <option value="TB">Terabyte (TB)</option>
                                     <option value="PB">Petabyte (PB)</option>
                                 </optgroup>
-                                <optgroup label="Bits" style={{ background: 'var(--bg-medium)', color: 'var(--accent-primary)' }}>
+                                <optgroup label="Bits">
                                     <option value="bit">Bit</option>
                                     <option value="Kib">Kibibit (Kib)</option>
                                     <option value="Mib">Mebibit (Mib)</option>
@@ -183,195 +162,77 @@ export default function BitConverter() {
                                 </optgroup>
                             </select>
                         </div>
-
-                        <div className="binary-input-group" style={{ justifyContent: 'flex-end', paddingTop: '24px' }}>
-                            <button
-                                onClick={handleConvert}
-                                style={{
-                                    background: 'var(--accent-primary)',
-                                    color: 'var(--bg-dark)',
-                                    border: 'none',
-                                    padding: '12px 32px',
-                                    borderRadius: '8px',
-                                    fontSize: '1rem',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    width: '100%'
-                                }}
-                                onMouseOver={(e) => {
-                                    e.target.style.background = 'var(--accent-secondary)';
-                                    e.target.style.transform = 'translateY(-2px)';
-                                    e.target.style.boxShadow = '0 4px 12px rgba(0, 255, 136, 0.4)';
-                                }}
-                                onMouseOut={(e) => {
-                                    e.target.style.background = 'var(--accent-primary)';
-                                    e.target.style.transform = 'translateY(0)';
-                                    e.target.style.boxShadow = 'none';
-                                }}
-                            >
-                                Convert
-                            </button>
-                        </div>
                     </div>
 
+                    <button
+                        className="binary-btn binary-btn-primary binary-btn-full"
+                        onClick={handleConvert}
+                    >
+                        Convert
+                    </button>
+
                     {result && (
-                        <div className="binary-result-box binary-result-primary" style={{ marginTop: '20px' }}>
-                            <div style={{ marginBottom: '15px' }}>
-                                <div style={{
-                                    fontSize: '0.85rem',
-                                    color: 'var(--text-secondary)',
-                                    marginBottom: '8px',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '1px'
-                                }}>
-                                    Result
-                                </div>
-                                <div style={{
-                                    fontSize: '2.5rem',
-                                    fontWeight: 'bold',
-                                    color: 'var(--accent-primary)',
-                                    fontFamily: 'monospace',
-                                    wordBreak: 'break-all'
-                                }}>
-                                    {result}
-                                </div>
-                                <div style={{
-                                    fontSize: '1.1rem',
-                                    color: 'var(--text-secondary)',
-                                    marginTop: '8px'
-                                }}>
-                                    {units[toUnit].label}
-                                </div>
+                        <div className="binary-result-box binary-result-primary">
+                            <div className="binary-bits-display">
+                                {result} {units[toUnit].label}
                             </div>
                             <div className="binary-details-grid">
                                 <div><strong>From:</strong> {inputValue} {units[fromUnit].label}</div>
-                                <div><strong>To:</strong> {units[toUnit].label}</div>
+                                <div><strong>To:</strong> {result} {units[toUnit].label}</div>
                             </div>
                         </div>
                     )}
                 </section>
 
-                {/* ================= UNITS REFERENCE TABLE ================= */}
                 <section className="binary-card">
                     <h2 className="binary-section-title binary-title-secondary">
                         <span className="binary-dot binary-dot-secondary"></span>
-                        Units Reference
+                        Reference Information
                     </h2>
 
                     <div className="binary-info-box binary-info-secondary">
-                        <h3 className="binary-info-heading">Understanding Binary Units:</h3>
+                        <h3 className="binary-info-heading">Understanding Digital Storage Units</h3>
                         <p className="binary-text">
-                            Computer storage uses <span className="binary-highlight-secondary">powers of 2</span>.
-                            Each unit represents 2<sup>n</sup> bits where n is the power value.
+                            Digital storage uses <span className="binary-highlight-secondary">binary prefixes</span> based on powers of 2.
+                            Each step up multiplies by 1024 (2<sup>10</sup>).
                         </p>
 
-                        {/* Dropdown Toggle */}
                         <button
+                            className="binary-toggle-btn binary-toggle-btn-secondary"
                             onClick={() => setShowTable(!showTable)}
-                            style={{
-                                marginTop: '10px',
-                                background: 'transparent',
-                                border: '1px solid var(--accent-secondary)',
-                                color: 'var(--accent-secondary)',
-                                padding: '8px 16px',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                width: '100%',
-                                transition: 'all 0.2s ease'
-                            }}
-                            onMouseOver={(e) => {
-                                e.target.style.background = 'rgba(0, 212, 255, 0.1)';
-                            }}
-                            onMouseOut={(e) => {
-                                e.target.style.background = 'transparent';
-                            }}
                         >
                             {showTable ? "Hide Complete Reference Table" : "Show Complete Reference Table"}
                         </button>
 
-                        {/* The Table */}
                         {showTable && (
-                            <div style={{
-                                marginTop: '15px',
-                                maxHeight: '500px',
-                                overflowY: 'auto',
-                                border: '1px solid var(--bg-medium)',
-                                borderRadius: '8px'
-                            }}>
-                                <table style={{
-                                    width: '100%',
-                                    borderCollapse: 'collapse',
-                                    fontSize: '0.9rem'
-                                }}>
-                                    <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-medium)', zIndex: 10 }}>
-                                        <tr style={{ color: 'var(--text-secondary)' }}>
-                                            <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid var(--accent-secondary)' }}>Unit</th>
-                                            <th style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid var(--accent-secondary)' }}>Symbol</th>
-                                            <th style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid var(--accent-secondary)' }}>2<sup>n</sup> Bits</th>
-                                            <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid var(--accent-secondary)' }}>Total Bits</th>
+                            <div className="binary-table-container">
+                                <table className="binary-table">
+                                    <thead className="binary-table-header">
+                                        <tr>
+                                            <th>Unit</th>
+                                            <th className="binary-table-cell-center">Symbol</th>
+                                            <th className="binary-table-cell-center">2<sup>n</sup> Bits</th>
+                                            <th className="binary-table-cell-right">Total Bits</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {Object.entries(groupedData).map(([category, items]) => (
                                             <React.Fragment key={category}>
-                                                <tr style={{ background: 'var(--bg-light)' }}>
-                                                    <td
-                                                        colSpan="4"
-                                                        style={{
-                                                            padding: '10px 12px',
-                                                            color: 'var(--accent-amber)',
-                                                            fontWeight: 'bold',
-                                                            fontSize: '0.85rem',
-                                                            textTransform: 'uppercase',
-                                                            letterSpacing: '1px',
-                                                            borderTop: '2px solid var(--bg-dark)'
-                                                        }}
-                                                    >
+                                                <tr>
+                                                    <td colSpan="4" className="binary-table-category">
                                                         {category}
                                                     </td>
                                                 </tr>
                                                 {items.map((row) => (
-                                                    <tr
-                                                        key={row.symbol}
-                                                        style={{
-                                                            borderBottom: '1px solid var(--bg-dark)',
-                                                            transition: 'background 0.2s ease'
-                                                        }}
-                                                        onMouseOver={(e) => {
-                                                            e.currentTarget.style.background = 'rgba(0, 212, 255, 0.05)';
-                                                        }}
-                                                        onMouseOut={(e) => {
-                                                            e.currentTarget.style.background = 'transparent';
-                                                        }}
-                                                    >
-                                                        <td style={{ padding: '10px 12px', color: 'var(--text-primary)', fontWeight: '600' }}>
-                                                            {row.unit}
-                                                        </td>
-                                                        <td style={{
-                                                            padding: '10px 12px',
-                                                            textAlign: 'center',
-                                                            fontFamily: 'monospace',
-                                                            color: 'var(--accent-secondary)',
-                                                            fontWeight: 'bold'
-                                                        }}>
+                                                    <tr key={row.symbol} className="binary-table-row">
+                                                        <td className="binary-table-cell">{row.unit}</td>
+                                                        <td className="binary-table-cell binary-table-cell-center binary-table-cell-mono binary-table-cell-secondary">
                                                             {row.symbol}
                                                         </td>
-                                                        <td style={{
-                                                            padding: '10px 12px',
-                                                            textAlign: 'center',
-                                                            fontFamily: 'monospace',
-                                                            color: 'var(--accent-amber)'
-                                                        }}>
+                                                        <td className="binary-table-cell binary-table-cell-center binary-table-cell-mono binary-table-cell-amber">
                                                             2<sup>{row.power}</sup>
                                                         </td>
-                                                        <td style={{
-                                                            padding: '10px 12px',
-                                                            textAlign: 'right',
-                                                            fontFamily: 'monospace',
-                                                            color: 'var(--accent-primary)'
-                                                        }}>
+                                                        <td className="binary-table-cell binary-table-cell-right binary-table-cell-mono binary-table-cell-primary">
                                                             {formatNumber(row.bits)}
                                                         </td>
                                                     </tr>
@@ -383,16 +244,18 @@ export default function BitConverter() {
                             </div>
                         )}
 
-                        <h4 style={{ color: 'var(--text-primary)', marginTop: '20px', marginBottom: '10px' }}>
-                            Example: <span className="binary-highlight-secondary">1 Megabyte (MB)</span>
-                        </h4>
-                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '8px' }}>
-                            <ol className="binary-list" style={{ margin: 0, paddingLeft: '20px' }}>
-                                <li><strong>1 MB</strong> = 1024 KB</li>
-                                <li><strong>1 MB</strong> = 1,048,576 Bytes</li>
-                                <li><strong>1 MB</strong> = <span className="binary-highlight-secondary">8,388,608 bits</span></li>
-                                <li><strong>Power:</strong> 2<sup>23</sup> bits</li>
-                            </ol>
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">
+                                Example: <span className="binary-highlight-secondary">1 Megabyte (MB)</span>
+                            </h4>
+                            <div className="binary-example-box">
+                                <ol className="binary-list">
+                                    <li><strong>1 MB</strong> = 1024 KB</li>
+                                    <li><strong>1 MB</strong> = 1,048,576 Bytes</li>
+                                    <li><strong>1 MB</strong> = <span className="binary-highlight-secondary">8,388,608 bits</span></li>
+                                    <li><strong>Power:</strong> 2<sup>23</sup> bits</li>
+                                </ol>
+                            </div>
                         </div>
                     </div>
                 </section>
