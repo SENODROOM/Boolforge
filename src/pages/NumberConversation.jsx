@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { QuaternarySection } from '../components/Quaternary Section';
 
 export default function NumberConverter() {
     const [decimal, setDecimal] = useState('');
@@ -732,6 +733,8 @@ export default function NumberConverter() {
                     </div>
                 )}
             </div>
+
+            <QuaternarySection />
         </div>
     );
 }
