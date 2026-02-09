@@ -20,10 +20,10 @@ function App() {
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Boolforge />} />
+          <Route path="/book" element={<ProblemSolver />} />
           <Route path="/numberconversation" element={<NumberConverter />} />
           <Route path="/numbersystemcalculator" element={<NumberSystemCalculator />} />
           <Route path="/binaryrepresentation" element={<BinaryRepresentation />} />
-          <Route path="/book" element={<ProblemSolver />} />
           <Route path="/paritybitcalculator" element={<ParityBitCalculator />} />
           <Route path="/bitconvertor" element={<BitConverter />} />
         </Routes>

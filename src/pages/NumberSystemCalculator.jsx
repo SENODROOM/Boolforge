@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const NumberSystemCalculator = () => {
     const [numberSystem, setNumberSystem] = useState('');
+    const [binaryRepresentation, setBinaryRepresentation] = useState('twos-complement');
     const [operation, setOperation] = useState('');
     const [input1, setInput1] = useState('');
     const [input2, setInput2] = useState('');
@@ -13,6 +14,11 @@ const NumberSystemCalculator = () => {
         { value: 'binary', label: 'Binary (Base 2)' },
         { value: 'octal', label: 'Octal (Base 8)' },
         { value: 'hexadecimal', label: 'Hexadecimal (Base 16)' }
+    ];
+
+    const binaryRepresentations = [
+        { value: 'twos-complement', label: "2's Complement" },
+        { value: 'signed-magnitude', label: 'Signed Magnitude' }
     ];
 
     const operations = [
@@ -43,6 +49,105 @@ const NumberSystemCalculator = () => {
 
     const fromDecimal = (value, base) => {
         return value.toString(base).toUpperCase();
+    };
+
+    // Binary helper functions
+    const decimalToTwosComplement = (num, bits = 8) => {
+        if (num >= 0) {
+            return num.toString(2).padStart(bits, '0');
+        } else {
+            const positive = Math.abs(num);
+            let binary = positive.toString(2).padStart(bits, '0');
+            let inverted = binary.split('').map(b => b === '0' ? '1' : '0').join('');
+            let result = (parseInt(inverted, 2) + 1).toString(2).padStart(bits, '0');
+            return result;
+        }
+    };
+
+    const twosComplementToDecimal = (binary) => {
+        if (binary.length === 0) return 0;
+        if (binary[0] === '0') {
+            return parseInt(binary, 2);
+        } else {
+            let inverted = binary.split('').map(b => b === '0' ? '1' : '0').join('');
+            let decimal = parseInt(inverted, 2) + 1;
+            return -decimal;
+        }
+    };
+
+    const decimalToSignedMagnitude = (num, bits = 8) => {
+        const sign = num < 0 ? '1' : '0';
+        const magnitude = Math.abs(num).toString(2).padStart(bits - 1, '0');
+        return sign + magnitude;
+    };
+
+    const signedMagnitudeToDecimal = (binary) => {
+        if (binary.length === 0) return 0;
+        const sign = binary[0] === '1' ? -1 : 1;
+        const magnitude = parseInt(binary.slice(1), 2);
+        return sign * magnitude;
+    };
+
+    const binaryInputToDecimal = (value) => {
+        return parseInt(value, 2);
+    };
+
+    const decimalToBinaryOutput = (value, bits = 8) => {
+        if (binaryRepresentation === 'signed-magnitude') {
+            return decimalToSignedMagnitude(value, bits);
+        } else {
+            return decimalToTwosComplement(value, bits);
+        }
+    };
+
+    const performBinaryOperation = (num1Str, num2Str, op) => {
+        const num1 = binaryInputToDecimal(num1Str);
+        const num2 = binaryInputToDecimal(num2Str);
+
+        let resultDecimal;
+        let operationName;
+
+        switch (op) {
+            case 'addition':
+                resultDecimal = num1 + num2;
+                operationName = 'Addition';
+                break;
+            case 'subtraction':
+                resultDecimal = num1 - num2;
+                operationName = 'Subtraction';
+                break;
+            case 'multiplication':
+                resultDecimal = num1 * num2;
+                operationName = 'Multiplication';
+                break;
+            default:
+                return null;
+        }
+
+        const bits = 8;
+        const binary1 = decimalToBinaryOutput(num1, bits);
+        const binary2 = decimalToBinaryOutput(num2, bits);
+        const binaryResult = decimalToBinaryOutput(resultDecimal, bits);
+
+        const stepData = {
+            input1: num1Str,
+            input2: num2Str,
+            decimal1: num1,
+            decimal2: num2,
+            binary1: binary1,
+            binary2: binary2,
+            decimalResult: resultDecimal,
+            binaryResult: binaryResult,
+            operation: operationName,
+            representation: binaryRepresentation
+        };
+
+        return {
+            result: binaryResult,
+            decimal: resultDecimal,
+            steps: stepData,
+            isBinarySpecial: true
+        };
     };
 
     const performAddition = (num1, num2, base) => {
@@ -85,10 +190,8 @@ const NumberSystemCalculator = () => {
         const dec1 = toDecimal(num1, base);
         const dec2 = toDecimal(num2, base);
 
-        // Check if result will be negative
         const isNegative = dec1 < dec2;
 
-        // If negative, swap numbers and calculate positive result
         let largerNum, smallerNum;
         if (isNegative) {
             largerNum = num2;
@@ -138,7 +241,6 @@ const NumberSystemCalculator = () => {
             borrow = newBorrow;
         }
 
-        // Remove leading zeros
         while (resultDigits.length > 1 && resultDigits[resultDigits.length - 1] === '0') {
             resultDigits.pop();
         }
@@ -164,7 +266,6 @@ const NumberSystemCalculator = () => {
             let carry = 0;
             const product = [];
 
-            // Add leading zeros for position
             for (let z = 0; z < i; z++) {
                 product.push('0');
             }
@@ -192,7 +293,6 @@ const NumberSystemCalculator = () => {
             partialProducts.push(product.reverse().join(''));
         }
 
-        // Sum all partial products
         let finalResult = '0';
         for (const partial of partialProducts) {
             const addResult = performAddition(finalResult, partial, base);
@@ -209,40 +309,85 @@ const NumberSystemCalculator = () => {
     const handleCalculate = () => {
         if (!input1 || !input2) return;
 
-        const base = getBase(numberSystem);
-        let calcResult;
+        try {
+            const base = getBase(numberSystem);
+            let calcResult;
 
-        if (operation === 'addition') {
-            calcResult = performAddition(input1.toUpperCase(), input2.toUpperCase(), base);
-        } else if (operation === 'subtraction') {
-            calcResult = performSubtraction(input1.toUpperCase(), input2.toUpperCase(), base);
-        } else if (operation === 'multiplication') {
-            calcResult = performMultiplication(input1.toUpperCase(), input2.toUpperCase(), base);
+            if (numberSystem === 'binary') {
+                calcResult = performBinaryOperation(input1, input2, operation);
+                setResult(calcResult);
+                setSteps([]); // Binary operations don't use array steps
+            } else {
+                if (operation === 'addition') {
+                    calcResult = performAddition(input1.toUpperCase(), input2.toUpperCase(), base);
+                } else if (operation === 'subtraction') {
+                    calcResult = performSubtraction(input1.toUpperCase(), input2.toUpperCase(), base);
+                } else if (operation === 'multiplication') {
+                    calcResult = performMultiplication(input1.toUpperCase(), input2.toUpperCase(), base);
+                }
+                setResult(calcResult);
+                setSteps(calcResult.steps);
+            }
+        } catch (error) {
+            console.error('Calculation error:', error);
         }
-
-        setResult(calcResult);
-        setSteps(calcResult.steps);
     };
 
     const renderAdditionVisualization = () => {
         if (!result || operation !== 'addition') return null;
 
+        // For binary special operations
+        if (result.isBinarySpecial) {
+            const num1Digits = result.steps.binary1.split('');
+            const num2Digits = result.steps.binary2.split('');
+            const resultDigits = result.result.split('');
+            const maxLen = Math.max(num1Digits.length, num2Digits.length);
+
+            while (num1Digits.length < maxLen) num1Digits.unshift(' ');
+            while (num2Digits.length < maxLen) num2Digits.unshift(' ');
+
+            return (
+                <div className="calculation-visual">
+                    <div className="visual-work">
+                        <div className="digit-row">
+                            <div className="operator-space"></div>
+                            {num1Digits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell">{digit}</div>
+                            ))}
+                        </div>
+                        <div className="digit-row">
+                            <div className="operator-space">+</div>
+                            {num2Digits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell">{digit}</div>
+                            ))}
+                        </div>
+                        <div className="separator-line"></div>
+                        <div className="digit-row result-row">
+                            <div className="operator-space"></div>
+                            {resultDigits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell result-digit">{digit}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Regular addition
         const num1Digits = input1.toUpperCase().split('');
         const num2Digits = input2.toUpperCase().split('');
         const resultDigits = result.result.split('');
         const maxLen = Math.max(num1Digits.length, num2Digits.length, resultDigits.length - 1);
 
-        // Pad arrays
         while (num1Digits.length < maxLen) num1Digits.unshift(' ');
         while (num2Digits.length < maxLen) num2Digits.unshift(' ');
 
         return (
             <div className="calculation-visual">
                 <div className="visual-work">
-                    {/* Carry row */}
                     <div className="digit-row carry-row">
                         <div className="operator-space"></div>
-                        {result.steps.map((step, idx) => (
+                        {steps.map((step, idx) => (
                             <div key={idx} className="digit-cell">
                                 {step.newCarry > 0 && (
                                     <span className="carry-indicator">{step.newCarry}</span>
@@ -250,27 +395,19 @@ const NumberSystemCalculator = () => {
                             </div>
                         )).reverse()}
                     </div>
-
-                    {/* First number */}
                     <div className="digit-row">
                         <div className="operator-space"></div>
                         {num1Digits.map((digit, idx) => (
                             <div key={idx} className="digit-cell">{digit}</div>
                         ))}
                     </div>
-
-                    {/* Second number */}
                     <div className="digit-row">
                         <div className="operator-space">+</div>
                         {num2Digits.map((digit, idx) => (
                             <div key={idx} className="digit-cell">{digit}</div>
                         ))}
                     </div>
-
-                    {/* Line */}
                     <div className="separator-line"></div>
-
-                    {/* Result */}
                     <div className="digit-row result-row">
                         <div className="operator-space"></div>
                         {resultDigits.map((digit, idx) => (
@@ -285,6 +422,45 @@ const NumberSystemCalculator = () => {
     const renderSubtractionVisualization = () => {
         if (!result || operation !== 'subtraction') return null;
 
+        // For binary special operations
+        if (result.isBinarySpecial) {
+            const num1Digits = result.steps.binary1.split('');
+            const num2Digits = result.steps.binary2.split('');
+            const resultDigits = result.result.split('');
+            const maxLen = Math.max(num1Digits.length, num2Digits.length);
+
+            while (num1Digits.length < maxLen) num1Digits.unshift(' ');
+            while (num2Digits.length < maxLen) num2Digits.unshift(' ');
+            while (resultDigits.length < maxLen) resultDigits.unshift(' ');
+
+            return (
+                <div className="calculation-visual">
+                    <div className="visual-work">
+                        <div className="digit-row">
+                            <div className="operator-space"></div>
+                            {num1Digits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell">{digit}</div>
+                            ))}
+                        </div>
+                        <div className="digit-row">
+                            <div className="operator-space">−</div>
+                            {num2Digits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell">{digit}</div>
+                            ))}
+                        </div>
+                        <div className="separator-line"></div>
+                        <div className="digit-row result-row">
+                            <div className="operator-space"></div>
+                            {resultDigits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell result-digit">{digit}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Regular subtraction
         const num1Digits = result.displayNum1.split('');
         const num2Digits = result.displayNum2.split('');
         const resultDigits = result.result.split('');
@@ -297,10 +473,9 @@ const NumberSystemCalculator = () => {
         return (
             <div className="calculation-visual">
                 <div className="visual-work">
-                    {/* Borrow row */}
                     <div className="digit-row borrow-row">
                         <div className="operator-space"></div>
-                        {result.steps.map((step, idx) => (
+                        {steps.map((step, idx) => (
                             <div key={idx} className="digit-cell">
                                 {step.newBorrow > 0 && (
                                     <span className="borrow-indicator">{step.newBorrow}</span>
@@ -308,27 +483,19 @@ const NumberSystemCalculator = () => {
                             </div>
                         )).reverse()}
                     </div>
-
-                    {/* First number */}
                     <div className="digit-row">
                         <div className="operator-space"></div>
                         {num1Digits.map((digit, idx) => (
                             <div key={idx} className="digit-cell">{digit}</div>
                         ))}
                     </div>
-
-                    {/* Second number */}
                     <div className="digit-row">
                         <div className="operator-space">−</div>
                         {num2Digits.map((digit, idx) => (
                             <div key={idx} className="digit-cell">{digit}</div>
                         ))}
                     </div>
-
-                    {/* Line */}
                     <div className="separator-line"></div>
-
-                    {/* Result */}
                     <div className="digit-row result-row">
                         <div className="operator-space">{result.isNegative ? '−' : ''}</div>
                         {resultDigits.map((digit, idx) => (
@@ -345,6 +512,40 @@ const NumberSystemCalculator = () => {
     const renderMultiplicationVisualization = () => {
         if (!result || operation !== 'multiplication') return null;
 
+        // For binary special operations
+        if (result.isBinarySpecial) {
+            const num1Digits = result.steps.binary1.split('');
+            const num2Digits = result.steps.binary2.split('');
+            const resultDigits = result.result.split('');
+
+            return (
+                <div className="calculation-visual">
+                    <div className="visual-work">
+                        <div className="digit-row">
+                            <div className="operator-space"></div>
+                            {num1Digits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell">{digit}</div>
+                            ))}
+                        </div>
+                        <div className="digit-row">
+                            <div className="operator-space">×</div>
+                            {num2Digits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell">{digit}</div>
+                            ))}
+                        </div>
+                        <div className="separator-line"></div>
+                        <div className="digit-row result-row">
+                            <div className="operator-space"></div>
+                            {resultDigits.map((digit, idx) => (
+                                <div key={idx} className="digit-cell result-digit">{digit}</div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Regular multiplication
         const num1Digits = input1.toUpperCase().split('');
         const num2Digits = input2.toUpperCase().split('');
         const resultDigits = result.result.split('');
@@ -352,26 +553,19 @@ const NumberSystemCalculator = () => {
         return (
             <div className="calculation-visual">
                 <div className="visual-work">
-                    {/* First number */}
                     <div className="digit-row">
                         <div className="operator-space"></div>
                         {num1Digits.map((digit, idx) => (
                             <div key={idx} className="digit-cell">{digit}</div>
                         ))}
                     </div>
-
-                    {/* Second number */}
                     <div className="digit-row">
                         <div className="operator-space">×</div>
                         {num2Digits.map((digit, idx) => (
                             <div key={idx} className="digit-cell">{digit}</div>
                         ))}
                     </div>
-
-                    {/* Line */}
                     <div className="separator-line"></div>
-
-                    {/* Partial products */}
                     {result.partialProducts && result.partialProducts.map((partial, idx) => {
                         const partialDigits = partial.split('');
                         return (
@@ -383,12 +577,9 @@ const NumberSystemCalculator = () => {
                             </div>
                         );
                     })}
-
                     {result.partialProducts && result.partialProducts.length > 1 && (
                         <div className="separator-line"></div>
                     )}
-
-                    {/* Result */}
                     <div className="digit-row result-row">
                         <div className="operator-space"></div>
                         {resultDigits.map((digit, idx) => (
@@ -400,8 +591,104 @@ const NumberSystemCalculator = () => {
         );
     };
 
+    const renderBinaryExplanation = () => {
+        if (!result || !result.isBinarySpecial) return null;
+
+        const { steps } = result;
+        const isTwosComp = binaryRepresentation === 'twos-complement';
+        const repName = isTwosComp ? "2's Complement" : "Signed Magnitude";
+
+        return (
+            <div className="explanation">
+                <h3 className="explanation-title">Step-by-Step: {repName} Explanation</h3>
+                <div className="explanation-content">
+                    <p className="explanation-intro">
+                        Computing <span className="highlight">{steps.input1}</span> {steps.operation === 'Addition' ? '+' : steps.operation === 'Subtraction' ? '−' : '×'} <span className="highlight">{steps.input2}</span> using {repName}
+                    </p>
+
+                    <div className="step-detail">
+                        <div className="step-header">Step 1: Convert inputs to decimal</div>
+                        <div className="step-body">
+                            • Input 1: {steps.input1} (binary) = {steps.decimal1} (decimal)
+                            <br />
+                            • Input 2: {steps.input2} (binary) = {steps.decimal2} (decimal)
+                        </div>
+                    </div>
+
+                    <div className="step-detail">
+                        <div className="step-header">Step 2: Represent in {repName} (8-bit)</div>
+                        <div className="step-body">
+                            {isTwosComp ? (
+                                <>
+                                    <strong>What is 2's Complement?</strong> The leftmost bit is the sign bit. 0 = positive, 1 = negative.
+                                    For negative numbers, invert all bits and add 1.
+                                    <br /><br />
+                                    • {steps.decimal1} → <code className="binary-highlight">{steps.binary1}</code>
+                                    {steps.decimal1 < 0 && <span className="hint"> (starts with 1 = negative)</span>}
+                                    {steps.decimal1 >= 0 && <span className="hint"> (starts with 0 = positive)</span>}
+                                    <br />
+                                    • {steps.decimal2} → <code className="binary-highlight">{steps.binary2}</code>
+                                    {steps.decimal2 < 0 && <span className="hint"> (starts with 1 = negative)</span>}
+                                    {steps.decimal2 >= 0 && <span className="hint"> (starts with 0 = positive)</span>}
+                                </>
+                            ) : (
+                                <>
+                                    <strong>What is Signed Magnitude?</strong> Simple! First bit = sign (0=positive, 1=negative), remaining bits = magnitude.
+                                    <br /><br />
+                                    • {steps.decimal1} → <code className="binary-highlight">{steps.binary1}</code>
+                                    {steps.decimal1 < 0 && <span className="hint"> (sign bit=1, magnitude={Math.abs(steps.decimal1)})</span>}
+                                    {steps.decimal1 >= 0 && <span className="hint"> (sign bit=0, magnitude={steps.decimal1})</span>}
+                                    <br />
+                                    • {steps.decimal2} → <code className="binary-highlight">{steps.binary2}</code>
+                                    {steps.decimal2 < 0 && <span className="hint"> (sign bit=1, magnitude={Math.abs(steps.decimal2)})</span>}
+                                    {steps.decimal2 >= 0 && <span className="hint"> (sign bit=0, magnitude={steps.decimal2})</span>}
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="step-detail">
+                        <div className="step-header">Step 3: Perform {steps.operation}</div>
+                        <div className="step-body">
+                            • Decimal: {steps.decimal1} {steps.operation === 'Addition' ? '+' : steps.operation === 'Subtraction' ? '−' : '×'} {steps.decimal2} = <strong>{steps.decimalResult}</strong>
+                            <br />
+                            {isTwosComp && (
+                                <span className="hint">💡 With 2's complement, the same addition circuit works for both positive and negative numbers!</span>
+                            )}
+                            {!isTwosComp && steps.decimalResult < 0 && (
+                                <span className="hint">💡 With signed magnitude, we compute the magnitude separately and set the sign bit based on the result.</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="step-detail">
+                        <div className="step-header">Step 4: Result in {repName}</div>
+                        <div className="step-body">
+                            • Binary result: <code className="binary-highlight">{steps.binaryResult}</code>
+                            <br />
+                            • Decimal: <strong>{steps.decimalResult}</strong>
+                            <br />
+                            {steps.decimalResult < 0 ?
+                                <span className="hint">First bit is 1 → This is a negative number</span> :
+                                <span className="hint">First bit is 0 → This is a positive number</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div className="final-result">
+                        <strong>Final Answer:</strong> {steps.binaryResult} ({steps.decimalResult} in decimal)
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderExplanation = () => {
         if (!result) return null;
+
+        if (result.isBinarySpecial) {
+            return renderBinaryExplanation();
+        }
 
         const base = getBase(numberSystem);
         const baseName = numberSystem.charAt(0).toUpperCase() + numberSystem.slice(1);
@@ -416,7 +703,7 @@ const NumberSystemCalculator = () => {
                             <span className="highlight">{input2.toUpperCase()}</span> in {baseName} (base {base}).
                         </p>
 
-                        {result.steps.slice().reverse().map((step, idx) => (
+                        {steps.slice().reverse().map((step, idx) => (
                             <div key={idx} className="step-detail">
                                 <div className="step-header">Position {step.position} (from right):</div>
                                 <div className="step-body">
@@ -461,7 +748,7 @@ const NumberSystemCalculator = () => {
                             <strong>Calculation:</strong> {result.displayNum1} − {result.displayNum2}
                         </p>
 
-                        {result.steps.slice().reverse().map((step, idx) => (
+                        {steps.slice().reverse().map((step, idx) => (
                             <div key={idx} className="step-detail">
                                 <div className="step-header">Position {step.position} (from right):</div>
                                 <div className="step-body">
@@ -536,10 +823,27 @@ const NumberSystemCalculator = () => {
             setResult(null);
             setSteps([]);
         }
-    }, [input1, input2, operation, numberSystem]);
+    }, [input1, input2, operation, numberSystem, binaryRepresentation]);
 
     return (
         <div className="calculator-container">
+            <style>{`
+                .binary-highlight {
+                    font-family: 'Courier New', monospace;
+                    background-color: #e3f2fd;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-weight: 600;
+                    color: #1565c0;
+                }
+                
+                .hint {
+                    color: #7b1fa2;
+                    font-style: italic;
+                    font-size: 0.9em;
+                    margin-left: 8px;
+                }
+            `}</style>
             <div className="grid-background"></div>
 
             <header className="header">
@@ -571,6 +875,23 @@ const NumberSystemCalculator = () => {
                             ))}
                         </select>
                     </div>
+
+                    {numberSystem === 'binary' && (
+                        <div className="control-group fade-in">
+                            <label className="control-label">Binary Representation</label>
+                            <select
+                                className="control-select"
+                                value={binaryRepresentation}
+                                onChange={(e) => setBinaryRepresentation(e.target.value)}
+                            >
+                                {binaryRepresentations.map((rep) => (
+                                    <option key={rep.value} value={rep.value}>
+                                        {rep.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     {numberSystem && (
                         <div className="control-group fade-in">
