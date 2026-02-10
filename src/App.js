@@ -12,6 +12,7 @@ import BinaryRepresentation from './pages/BinaryRepresentation';
 import ProblemSolver from './pages/Book/Ch1';
 import BitConverter from './pages/Bitconverter';
 import ParityBitCalculator from './pages/ParityBitCalculator';
+import KMapGenerator from './pages/KmapGenerator';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/binaryrepresentation" element={<BinaryRepresentation />} />
           <Route path="/paritybitcalculator" element={<ParityBitCalculator />} />
           <Route path="/bitconvertor" element={<BitConverter />} />
+          <Route path="/kmapGenerator" element={<KMapGenerator />} />
         </Routes>
       </BrowserRouter>
     </>
