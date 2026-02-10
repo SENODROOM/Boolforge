@@ -27,7 +27,7 @@ function App() {
           <Route path="/binaryrepresentation" element={<BinaryRepresentation />} />
           <Route path="/paritybitcalculator" element={<ParityBitCalculator />} />
           <Route path="/bitconvertor" element={<BitConverter />} />
-          <Route path="/kmapGenerator" element={<KMapGenerator />} />
+          <Route path="/kmapgenerator" element={<KMapGenerator />} />
         </Routes>
       </BrowserRouter>
     </>
