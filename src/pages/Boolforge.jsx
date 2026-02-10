@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { gateSymbols } from '../data/gates';
 import { TruthTableGenerator } from '../components/TruthTable';
 import { SaveAndLoad } from '../components/SaveAndLoad';
+import { parseExpressionToCircuit } from '../utils/expressionParser';
 
-const Boolforge = () => {
+const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
   const [gates, setGates] = useState([]);
   const [wires, setWires] = useState([]);
   const [selectedGate, setSelectedGate] = useState(null);
@@ -16,6 +17,10 @@ const Boolforge = () => {
   const [outputCounter, setOutputCounter] = useState(0);
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [zoom, setZoom] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -37,7 +42,7 @@ const Boolforge = () => {
     setHistory(prev => {
       const newHistory = prev.slice(0, historyIndex + 1);
       newHistory.push(state);
-      return newHistory.slice(-50); // Keep last 50 states
+      return newHistory.slice(-50);
     });
     setHistoryIndex(prev => Math.min(prev + 1, 49));
   }, [gates, wires, gateIdCounter, wireIdCounter, inputCounter, outputCounter, historyIndex]);
@@ -51,15 +56,13 @@ const Boolforge = () => {
       setSelectedGate(null);
       saveToHistory();
     },
-    [setGates, setWires, setSelectedGate, saveToHistory] // dependencies
+    [setGates, setWires, setSelectedGate, saveToHistory]
   );
-
 
   const snapToGrid = (value) => {
     return SNAP_TO_GRID ? Math.round(value / GRID_SIZE) * GRID_SIZE : value;
   };
 
-  // Helper function to find gate by ID using Map for O(1) lookup
   const gateMap = React.useMemo(() => {
     const map = new Map();
     gates.forEach(gate => map.set(gate.id, gate));
@@ -69,7 +72,6 @@ const Boolforge = () => {
   const evaluateGate = useCallback((gate, memo = new Map()) => {
     if (!gate) return false;
 
-    // Check memoization cache
     if (memo.has(gate.id)) {
       return memo.get(gate.id);
     }
@@ -129,7 +131,6 @@ const Boolforge = () => {
     return result;
   }, [wires, gateMap]);
 
-  // Enhanced wire drawing with smooth bezier curves
   const drawWires = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -137,7 +138,12 @@ const Boolforge = () => {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const memo = new Map(); // Shared memoization cache for all evaluations
+    // Save context and apply transformations
+    ctx.save();
+    ctx.translate(panOffset.x, panOffset.y);
+    ctx.scale(zoom, zoom);
+
+    const memo = new Map();
 
     wires.forEach(wire => {
       const fromGate = gateMap.get(wire.fromId);
@@ -145,7 +151,6 @@ const Boolforge = () => {
 
       if (!fromGate || !toGate) return;
 
-      // Calculate connection points
       const fromX = fromGate.x + 120;
       const fromY = fromGate.y + 50;
 
@@ -155,24 +160,20 @@ const Boolforge = () => {
 
       const isActive = evaluateGate(fromGate, memo);
 
-      // Set wire appearance
       ctx.strokeStyle = isActive ? '#00ff88' : '#334155';
-      ctx.lineWidth = 3;
-      ctx.shadowBlur = isActive ? 12 : 0;
+      ctx.lineWidth = 3 / zoom; // Scale line width inversely with zoom
+      ctx.shadowBlur = isActive ? 12 / zoom : 0;
       ctx.shadowColor = isActive ? '#00ff88' : 'transparent';
 
       ctx.beginPath();
       ctx.moveTo(fromX, fromY);
 
-      // Calculate control points for smooth bezier curve
       const dx = toX - fromX;
       const dy = toY - fromY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // Adaptive control point distance for more natural curves
       const controlDistance = Math.min(Math.abs(dx) / 2, distance / 3);
 
-      // Create smooth S-curve
       ctx.bezierCurveTo(
         fromX + controlDistance, fromY,
         toX - controlDistance, toY,
@@ -182,9 +183,11 @@ const Boolforge = () => {
       ctx.stroke();
       ctx.shadowBlur = 0;
     });
-  }, [wires, gateMap, evaluateGate]);
 
-  // Continuous rendering loop for smooth wire updates
+    // Restore context
+    ctx.restore();
+  }, [wires, gateMap, evaluateGate, zoom, panOffset]);
+
   useEffect(() => {
     const animate = () => {
       drawWires();
@@ -219,8 +222,6 @@ const Boolforge = () => {
     };
   }, [drawWires]);
 
-
-
   const undo = useCallback(() => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
@@ -251,136 +252,189 @@ const Boolforge = () => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        undo();
-      } else if ((e.ctrlKey || e.metaKey) && ((e.shiftKey && e.key === 'z') || e.key === 'y')) {
+      if (e.ctrlKey && e.shiftKey && e.key === 'Z') {
         e.preventDefault();
         redo();
-      } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selectedGate && !dragging) {
-          deleteGate(selectedGate);
-        }
+      } else if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        undo();
+      } else if (e.key === 'Delete' && selectedGate) {
+        deleteGate(selectedGate);
       } else if (e.key === 'Escape') {
         setConnectingFrom(null);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedGate, dragging, undo, redo, deleteGate]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [undo, redo, selectedGate, deleteGate]);
+
+  // Handle zoom with mouse wheel
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.1, Math.min(3, zoom * delta));
+
+      // Adjust pan to zoom towards mouse position
+      const zoomRatio = newZoom / zoom;
+      const newPanX = mouseX - (mouseX - panOffset.x) * zoomRatio;
+      const newPanY = mouseY - (mouseY - panOffset.y) * zoomRatio;
+
+      setZoom(newZoom);
+      setPanOffset({ x: newPanX, y: newPanY });
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [zoom, panOffset]);
+
+  // Handle canvas drag to pan
+  const handleCanvasMouseDown = (e) => {
+    // Only pan if clicking on canvas background (not on gates)
+    if (e.target === canvasRef.current) {
+      e.preventDefault();
+      setIsPanning(true);
+      setPanStart({
+        x: e.clientX - panOffset.x,
+        y: e.clientY - panOffset.y
+      });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isPanning) {
+      setPanOffset({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+  };
 
   const addGate = (type) => {
-    const isInput = type === 'INPUT';
-    const isOutput = type === 'OUTPUT';
-    const isNot = type === 'NOT' || type === 'BUFFER';
+    const hasOutput = type !== 'OUTPUT';
+    const inputs = type === 'INPUT' ? 0 : (type === 'NOT' || type === 'BUFFER' ? 1 : 2);
 
-    // Generate labels for inputs and outputs using counters
-    let label = null;
+    // Override inputs for OUTPUT to be exactly 1
+    const finalInputs = type === 'OUTPUT' ? 1 : inputs;
+
+    let label = type;
     if (type === 'INPUT') {
-      const baseIndex = inputCounter % 13; // A-M (13 letters)
-      const suffix = Math.floor(inputCounter / 13);
-      const baseLetter = String.fromCharCode(65 + baseIndex); // A=65, B=66, ..., M=77
-      label = suffix === 0 ? baseLetter : `${baseLetter}${suffix + 1}`;
+      // Use sequential alphabet labeling: A-Z, AA-AZ, BA-BZ, etc.
+      label = generateInputLabel(inputCounter);
+      setInputCounter(prev => prev + 1);
     } else if (type === 'OUTPUT') {
-      const baseIndex = outputCounter % 13; // Z-N (13 letters)
-      const suffix = Math.floor(outputCounter / 13);
-      const baseLetter = String.fromCharCode(90 - baseIndex); // Z=90, Y=89, ..., N=78
-      label = suffix === 0 ? baseLetter : `${baseLetter}${suffix + 1}`;
+      // Use reverse sequential labeling: Z, Y, X, ..., A, ZZ, ZY, etc.
+      label = generateOutputLabel(outputCounter);
+      setOutputCounter(prev => prev + 1);
     }
 
     const newGate = {
       id: gateIdCounter,
-      type: type,
-      x: 100 + Math.random() * 300,
-      y: 100 + Math.random() * 300,
-      inputs: isInput ? 0 : (isNot || isOutput ? 1 : 2),
-      hasOutput: !isOutput,
-      output: null,
-      inputValues: isInput ? [false] : [],
-      label: label
+      type,
+      label,
+      x: 100 + (gates.length % 5) * 140,
+      y: 100 + Math.floor(gates.length / 5) * 120,
+      inputs: finalInputs,
+      hasOutput,
+      inputValues: type === 'INPUT' ? [false] : []
     };
 
     setGates(prev => [...prev, newGate]);
     setGateIdCounter(prev => prev + 1);
-    if (isInput) setInputCounter(prev => prev + 1);
-    if (isOutput) setOutputCounter(prev => prev + 1);
     saveToHistory();
   };
 
   const startDrag = (e, gate) => {
-    if (e.target.classList?.contains('connection-point')) return;
+    if (e.button !== 0) return;
+    e.stopPropagation();
 
-    setSelectedGate(gate);
+    // Prevent panning when starting to drag a gate
+    setIsPanning(false);
     setDragging(true);
+    setSelectedGate(gate);
     setDragOffset({
-      x: e.clientX - gate.x,
-      y: e.clientY - gate.y
+      x: e.clientX - gate.x * zoom - panOffset.x,
+      y: e.clientY - gate.y * zoom - panOffset.y
     });
   };
 
   const onDrag = (e) => {
-    if (!dragging || !selectedGate) return;
+    if (!dragging || !selectedGate || isPanning) return;
 
-    const newX = snapToGrid(e.clientX - dragOffset.x);
-    const newY = snapToGrid(e.clientY - dragOffset.y);
+    const container = containerRef.current;
+    if (!container) return;
 
-    setGates(prev => prev.map(g =>
-      g.id === selectedGate.id ? { ...g, x: newX, y: newY } : g
-    ));
+    const x = snapToGrid((e.clientX - dragOffset.x - panOffset.x) / zoom);
+    const y = snapToGrid((e.clientY - dragOffset.y - panOffset.y) / zoom);
+
+    setGates(prev =>
+      prev.map(g =>
+        g.id === selectedGate.id ? { ...g, x, y } : g
+      )
+    );
   };
 
   const stopDrag = () => {
     if (dragging) {
+      setDragging(false);
       saveToHistory();
     }
-    setDragging(false);
-    setSelectedGate(null);
   };
 
-
   const startConnection = (gate) => {
-    if (gate.hasOutput) {
-      setConnectingFrom(gate);
-    }
+    if (!gate.hasOutput) return;
+    setConnectingFrom(gate);
   };
 
   const completeConnection = (toGate, toIndex) => {
-    if (!connectingFrom || !toGate || connectingFrom.id === toGate.id) {
+    if (!connectingFrom || connectingFrom.id === toGate.id) {
       setConnectingFrom(null);
       return;
     }
 
-    const existingWire = wires.find(w =>
-      w.toId === toGate.id && w.toIndex === toIndex
+    // Remove any existing wire to this input point
+    const filteredWires = wires.filter(
+      w => !(w.toId === toGate.id && w.toIndex === toIndex)
     );
 
-    if (existingWire) {
-      alert('This input is already connected');
-      setConnectingFrom(null);
-      return;
-    }
+    // For OUTPUT gates, remove ALL existing wires (since they should only have one input)
+    const finalWires = toGate.type === 'OUTPUT'
+      ? filteredWires.filter(w => w.toId !== toGate.id)
+      : filteredWires;
 
     const newWire = {
       id: wireIdCounter,
       fromId: connectingFrom.id,
       toId: toGate.id,
-      toIndex: toIndex
+      toIndex
     };
 
-    setWires(prev => [...prev, newWire]);
+    setWires([...finalWires, newWire]);
     setWireIdCounter(prev => prev + 1);
     setConnectingFrom(null);
     saveToHistory();
   };
 
-  const deleteWire = (wireToDelete) => {
-    setWires(prev => prev.filter(w => w.id !== wireToDelete.id));
-    saveToHistory();
-  };
-
   const handleCanvasClick = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
@@ -392,55 +446,31 @@ const Boolforge = () => {
 
       const fromX = fromGate.x + 120;
       const fromY = fromGate.y + 50;
-      const toInputCount = toGate.inputs;
       const toX = toGate.x;
-      const toY = toGate.y + (toInputCount === 1 ? 50 : (wire.toIndex === 0 ? 35 : 65));
+      const toY = toGate.y + (toGate.inputs === 1 ? 50 : (wire.toIndex === 0 ? 35 : 65));
 
-      if (isPointNearBezier(x, y, fromX, fromY, toX, toY)) {
-        deleteWire(wire);
-        break;
+      const distance = Math.abs((toY - fromY) * x - (toX - fromX) * y + toX * fromY - toY * fromX) /
+        Math.sqrt((toY - fromY) ** 2 + (toX - fromX) ** 2);
+
+      if (distance < 10) {
+        setWires(prev => prev.filter(w => w.id !== wire.id));
+        saveToHistory();
+        return;
       }
     }
   };
 
-  const isPointNearBezier = (px, py, x1, y1, x2, y2) => {
-    const threshold = 10;
-    const steps = 100;
-
-    const dx = x2 - x1;
-    const controlDistance = Math.min(Math.abs(dx) / 2, Math.sqrt(dx * dx + (y2 - y1) * (y2 - y1)) / 3);
-
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const mt = 1 - t;
-      const mt2 = mt * mt;
-      const mt3 = mt2 * mt;
-      const t2 = t * t;
-      const t3 = t2 * t;
-
-      const cx1 = x1 + controlDistance;
-      const cy1 = y1;
-      const cx2 = x2 - controlDistance;
-      const cy2 = y2;
-
-      const x = mt3 * x1 + 3 * mt2 * t * cx1 + 3 * mt * t2 * cx2 + t3 * x2;
-      const y = mt3 * y1 + 3 * mt2 * t * cy1 + 3 * mt * t2 * cy2 + t3 * y2;
-
-      const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
-      if (dist < threshold) return true;
-    }
-    return false;
-  };
-
   const toggleInput = (gate) => {
-    setGates(prev => prev.map(g =>
-      g.id === gate.id
-        ? { ...g, inputValues: [!g.inputValues[0]] }
-        : g
-    ));
+    setGates(prev =>
+      prev.map(g =>
+        g.id === gate.id
+          ? { ...g, inputValues: [!g.inputValues[0]] }
+          : g
+      )
+    );
   };
 
-  const evaluateGateWithGates = useCallback((gate, gatesList) => {
+  const evaluateGateWithGates = useCallback((gate, gatesArray) => {
     if (!gate) return false;
 
     if (gate.type === 'INPUT') {
@@ -448,11 +478,12 @@ const Boolforge = () => {
     }
 
     const inputs = [];
+
     wires.forEach(wire => {
       if (wire.toId === gate.id) {
-        const fromGate = gatesList.find(g => g.id === wire.fromId);
+        const fromGate = gatesArray.find(g => g.id === wire.fromId);
         if (fromGate) {
-          const sourceOutput = evaluateGateWithGates(fromGate, gatesList);
+          const sourceOutput = evaluateGateWithGates(fromGate, gatesArray);
           inputs[wire.toIndex] = sourceOutput;
         }
       }
@@ -522,8 +553,6 @@ const Boolforge = () => {
     return { headers, rows };
   }, [gates, evaluateGateWithGates]);
 
-
-
   const clearCircuit = () => {
     setGates([]);
     setWires([]);
@@ -535,17 +564,140 @@ const Boolforge = () => {
     setHistoryIndex(-1);
   };
 
+  // Generate input label: A-M, then AA-AM, BA-BM, ..., MA-MM, then AAA-AAM, etc.
+  const generateInputLabel = (index) => {
+    const alphabet = 'ABCDEFGHIJKLM'; // A to M (13 letters)
+    const base = alphabet.length;
+
+    if (index < base) {
+      // Single letter: A-M
+      return alphabet[index];
+    }
+
+    // For multi-letter labels
+    let label = '';
+    let remaining = index - base; // Offset for double letters starting after M
+    let length = 2; // Start with double letters
+
+    // Find the appropriate length (2, 3, 4, etc.)
+    let maxForLength = Math.pow(base, length);
+    while (remaining >= maxForLength) {
+      remaining -= maxForLength;
+      length++;
+      maxForLength = Math.pow(base, length);
+    }
+
+    // Generate the label for the current length
+    for (let i = 0; i < length; i++) {
+      label = alphabet[remaining % base] + label;
+      remaining = Math.floor(remaining / base);
+    }
+
+    return label;
+  };
+
+  // Generate output label: Z-N, then ZZ-ZN, YZ-YN, ..., NZ-NN, then ZZZ-ZZN, etc.
+  const generateOutputLabel = (index) => {
+    const alphabet = 'ZYXWVUTSRQPON'; // Z to N reversed (13 letters)
+    const base = alphabet.length;
+
+    if (index < base) {
+      // Single letter: Z-N
+      return alphabet[index];
+    }
+
+    // For multi-letter labels
+    let label = '';
+    let remaining = index - base; // Offset for double letters starting after N
+    let length = 2; // Start with double letters
+
+    // Find the appropriate length (2, 3, 4, etc.)
+    let maxForLength = Math.pow(base, length);
+    while (remaining >= maxForLength) {
+      remaining -= maxForLength;
+      length++;
+      maxForLength = Math.pow(base, length);
+    }
+
+    // Generate the label for the current length
+    for (let i = 0; i < length; i++) {
+      label = alphabet[remaining % base] + label;
+      remaining = Math.floor(remaining / base);
+    }
+
+    return label;
+  };
+
   const inputGates = React.useMemo(() => gates.filter(g => g.type === 'INPUT'), [gates]);
   const outputGates = React.useMemo(() => gates.filter(g => g.type === 'OUTPUT'), [gates]);
   const truthTable = React.useMemo(() => generateTruthTable(), [generateTruthTable]);
 
+  // Track if circuit has been auto-built
+  const hasAutoBuilt = useRef(false);
+
+  // Auto-build circuit from simplified expression
+  useEffect(() => {
+    if (simplifiedExpression && variables.length > 0 && !hasAutoBuilt.current) {
+      const circuit = parseExpressionToCircuit(simplifiedExpression, variables);
+      if (circuit.gates && circuit.gates.length > 0) {
+        setGates(circuit.gates);
+        setWires(circuit.wires);
+        setGateIdCounter(circuit.gateIdCounter || circuit.gates.length);
+        setWireIdCounter(circuit.wireIdCounter || circuit.wires.length);
+
+        // Count actual INPUT and OUTPUT gates from the generated circuit
+        const inputCount = circuit.gates.filter(g => g.type === 'INPUT').length;
+        const outputCount = circuit.gates.filter(g => g.type === 'OUTPUT').length;
+        setInputCounter(inputCount);
+        setOutputCounter(outputCount);
+
+        hasAutoBuilt.current = true;
+
+        // Save to history after a short delay to ensure state is updated
+        setTimeout(() => {
+          const state = {
+            gates: circuit.gates,
+            wires: circuit.wires,
+            gateIdCounter: circuit.gateIdCounter || circuit.gates.length,
+            wireIdCounter: circuit.wireIdCounter || circuit.wires.length,
+            inputCounter: inputCount,
+            outputCounter: outputCount
+          };
+          setHistory([state]);
+          setHistoryIndex(0);
+        }, 100);
+      }
+    }
+  }, [simplifiedExpression, variables]);
+
   return (
     <div className="container circuit-maker"
-      onMouseMove={onDrag}
-      onMouseUp={stopDrag}
+      onMouseMove={(e) => {
+        if (isPanning) {
+          handleMouseMove(e);
+        } else {
+          onDrag(e);
+        }
+      }}
+      onMouseUp={() => {
+        stopDrag();
+        handleMouseUp();
+      }}
     >
       <div className="sidebar">
         <h2>Logic Gates</h2>
+
+        {/* Display Simplified Expression */}
+        {simplifiedExpression && (
+          <div className="simplified-expression-display">
+            <h3>📐 K-Map Simplified Expression</h3>
+            <div className="expression-content">
+              {simplifiedExpression}
+            </div>
+            <p className="expression-hint">Circuit auto-generated below! ✨</p>
+          </div>
+        )}
+
         <div className="gate-palette">
           <button className="gate-btn" onClick={() => addGate('INPUT')}>INPUT</button>
           <button className="gate-btn" onClick={() => addGate('OUTPUT')}>OUTPUT</button>
@@ -563,9 +715,11 @@ const Boolforge = () => {
           <p><strong>Controls:</strong></p>
           <p>• Click gate buttons to add gates</p>
           <p>• Drag gates to move them</p>
+          <p>• Drag canvas background to pan</p>
           <p>• Click output → input to connect</p>
           <p>• Click wire to delete it</p>
           <p>• Right-click gate to delete</p>
+          <p>• Scroll to zoom in/out</p>
           <p><strong>Keyboard Shortcuts:</strong></p>
           <p>• Ctrl+Z: Undo</p>
           <p>• Ctrl+Shift+Z: Redo</p>
@@ -578,47 +732,59 @@ const Boolforge = () => {
         <canvas
           ref={canvasRef}
           onClick={handleCanvasClick}
-          style={{ pointerEvents: 'auto' }}
+          onMouseDown={handleCanvasMouseDown}
+          style={{
+            pointerEvents: 'auto',
+            cursor: isPanning ? 'grabbing' : 'grab'
+          }}
         />
 
-        {gates.map(gate => (
-          <div
-            key={gate.id}
-            className={`gate ${gate.type === 'OUTPUT' ? 'output-gate' : ''} ${selectedGate?.id === gate.id ? 'selected' : ''} ${gate.type === 'OUTPUT' && evaluateGate(gate) ? 'active' : ''}`}
-            style={{ left: gate.x, top: gate.y }}
-            onMouseDown={(e) => startDrag(e, gate)}
-            onContextMenu={(e) => { e.preventDefault(); deleteGate(gate); }}
-          >
-            <div className="gate-content">
-              {gateSymbols[gate.type]}
-              <div className="gate-label">{gate.label || gate.type}</div>
-            </div>
+        <div
+          className="gates-container"
+          style={{
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
+            transformOrigin: '0 0'
+          }}
+        >
+          {gates.map(gate => (
+            <div
+              key={gate.id}
+              className={`gate ${gate.type === 'OUTPUT' ? 'output-gate' : ''} ${selectedGate?.id === gate.id ? 'selected' : ''} ${gate.type === 'OUTPUT' && evaluateGate(gate) ? 'active' : ''}`}
+              style={{ left: gate.x, top: gate.y }}
+              onMouseDown={(e) => startDrag(e, gate)}
+              onContextMenu={(e) => { e.preventDefault(); deleteGate(gate); }}
+            >
+              <div className="gate-content">
+                {gateSymbols[gate.type]}
+                <div className="gate-label">{gate.label || gate.type}</div>
+              </div>
 
-            {gate.hasOutput && (
-              <div
-                className={`connection-point output-point ${connectingFrom?.id === gate.id ? 'active' : ''}`}
-                onClick={() => startConnection(gate)}
-              />
-            )}
-
-            {gate.inputs > 0 && (
-              <>
+              {gate.hasOutput && (
                 <div
-                  className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
-                  style={{ top: gate.inputs === 1 ? '50%' : '35%' }}
-                  onClick={() => completeConnection(gate, 0)}
+                  className={`connection-point output-point ${connectingFrom?.id === gate.id ? 'active' : ''}`}
+                  onClick={() => startConnection(gate)}
                 />
-                {gate.inputs === 2 && (
+              )}
+
+              {gate.inputs > 0 && (
+                <>
                   <div
                     className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
-                    style={{ top: '65%' }}
-                    onClick={() => completeConnection(gate, 1)}
+                    style={{ top: '50%' }}
+                    onClick={() => completeConnection(gate, 0)}
                   />
-                )}
-              </>
-            )}
-          </div>
-        ))}
+                  {gate.inputs === 2 && (
+                    <div
+                      className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
+                      style={{ top: '65%' }}
+                      onClick={() => completeConnection(gate, 1)}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="truth-table-panel">
@@ -682,6 +848,31 @@ const Boolforge = () => {
           <button className="btn danger" onClick={clearCircuit}>🗑️ Clear All</button>
         </div>
 
+        <div className="zoom-controls">
+          <button
+            className="btn zoom-btn"
+            onClick={() => setZoom(Math.min(3, zoom * 1.2))}
+            title="Zoom In"
+          >
+            🔍+
+          </button>
+          <span className="zoom-level">{Math.round(zoom * 100)}%</span>
+          <button
+            className="btn zoom-btn"
+            onClick={() => setZoom(Math.max(0.1, zoom * 0.8))}
+            title="Zoom Out"
+          >
+            🔍−
+          </button>
+          <button
+            className="btn zoom-btn"
+            onClick={() => { setZoom(1); setPanOffset({ x: 0, y: 0 }); }}
+            title="Reset Zoom"
+          >
+            ⟲
+          </button>
+        </div>
+
         <div className="stats">
           <div><span>Gates:</span> <strong>{gates.length}</strong></div>
           <div><span>Wires:</span> <strong>{wires.length}</strong></div>
@@ -689,6 +880,96 @@ const Boolforge = () => {
           <div><span>Outputs:</span> <strong>{outputGates.length}</strong></div>
         </div>
       </div>
+
+      <style jsx>{`
+        .simplified-expression-display {
+          background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+          border: 2px solid rgba(99, 102, 241, 0.4);
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 20px;
+          animation: slideDown 0.3s ease-out;
+        }
+
+        .simplified-expression-display h3 {
+          color: #a78bfa;
+          font-size: 14px;
+          margin: 0 0 12px 0;
+          font-weight: 600;
+          letter-spacing: 0.5px;
+        }
+
+        .expression-content {
+          background: rgba(15, 23, 42, 0.6);
+          border: 1px solid rgba(99, 102, 241, 0.3);
+          border-radius: 8px;
+          padding: 14px;
+          font-family: 'Courier New', monospace;
+          font-size: 16px;
+          color: #fbbf24;
+          font-weight: bold;
+          text-align: center;
+          letter-spacing: 1px;
+          box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .expression-hint {
+          margin: 12px 0 0 0;
+          font-size: 11px;
+          color: #94a3b8;
+          text-align: center;
+          font-style: italic;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .gates-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+
+        .gates-container > * {
+          pointer-events: auto;
+        }
+
+        .zoom-controls {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px;
+          background: rgba(15, 23, 42, 0.6);
+          border: 1px solid rgba(99, 102, 241, 0.3);
+          border-radius: 8px;
+          margin-top: 12px;
+        }
+
+        .zoom-btn {
+          min-width: 40px;
+          padding: 6px 12px;
+          font-size: 14px;
+        }
+
+        .zoom-level {
+          min-width: 50px;
+          text-align: center;
+          color: #a78bfa;
+          font-weight: 600;
+          font-size: 13px;
+        }
+      `}</style>
     </div>
   );
 };
