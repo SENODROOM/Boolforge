@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react';
 
 export const KMapDisplay = ({
     grid,
@@ -9,7 +9,7 @@ export const KMapDisplay = ({
     getRowLabels,
     showGroupingGuide
 }) => {
-    const getCellKey = (rowIdx, colIdx) => `${rowIdx}-${colIdx}`;
+    // const getCellKey = (rowIdx, colIdx) => `${rowIdx}-${colIdx}`;
 
     const getCellGroups = (rowIdx, colIdx) => {
         if (!showGroupingGuide) return [];
@@ -25,9 +25,8 @@ export const KMapDisplay = ({
         return (
             <td
                 key={colIdx}
-                className={`kmap-cell ${
-                    cell === 1 ? 'kmap-cell-filled' : 'kmap-cell-empty'
-                } ${isGrouped ? 'kmap-cell-grouped' : ''}`}
+                className={`kmap-cell ${cell === 1 ? 'kmap-cell-filled' : 'kmap-cell-empty'
+                    } ${isGrouped ? 'kmap-cell-grouped' : ''}`}
                 style={isGrouped ? {
                     backgroundColor: cellGroups[0].color.bg,
                     borderColor: cellGroups[0].color.border,
@@ -64,8 +63,8 @@ export const KMapDisplay = ({
                                         {numVariables === 2
                                             ? variables[0]
                                             : variables.slice(0, 2).join('')} \ {numVariables === 2
-                                            ? variables[1]
-                                            : (numVariables === 3 ? variables[2] : variables.slice(2).join(''))}
+                                                ? variables[1]
+                                                : (numVariables === 3 ? variables[2] : variables.slice(2).join(''))}
                                     </div>
                                 </th>
                                 {getColumnLabels().map((label, idx) => (

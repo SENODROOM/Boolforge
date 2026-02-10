@@ -17,7 +17,7 @@ export const useKMapLogic = (numVariables, variables, minterms) => {
         const cols = numVariables <= 2 ? 2 : 4;
         const gridArray = Array(rows).fill(null).map(() => Array(cols).fill(0));
 
-        const grayCode2 = [0, 1]; // For 2 variables: 0, 1
+        // const grayCode2 = [0, 1]; // For 2 variables: 0, 1
         const grayCode4 = [0, 1, 3, 2]; // For 3-4 variables: 00, 01, 11, 10
         const mintermSet = new Set(mintermArray);
 

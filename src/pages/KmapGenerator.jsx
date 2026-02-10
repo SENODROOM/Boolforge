@@ -18,8 +18,7 @@ const KMapGenerator = () => {
         expression,
         groups,
         getColumnLabels,
-        getRowLabels,
-        simplifyBoolean
+        getRowLabels
     } = useKMapLogic(numVariables, variables, minterms);
 
     const handleVariablesChange = (value) => {

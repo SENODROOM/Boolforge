@@ -2,7 +2,7 @@ export const detectGroups = (grid, numVariables, mintermArray) => {
     const groups = [];
     const rows = grid.length;
     const cols = grid[0].length;
-    const grayCode2 = [0, 1];
+    // const grayCode2 = [0, 1];
     const grayCode4 = [0, 1, 3, 2];
 
     // Helper to get minterm from grid position
@@ -37,7 +37,7 @@ export const detectGroups = (grid, numVariables, mintermArray) => {
         { rows: 1, cols: 1, size: 1 }
     ];
 
-    const covered = new Set();
+    // const covered = new Set();
     const usedMinterms = new Set();
 
     for (const { rows: gRows, cols: gCols, size } of groupSizes) {

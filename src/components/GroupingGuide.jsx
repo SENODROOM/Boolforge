@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { WhiteboardAnimation } from './WhiteboardAnimation';
 
@@ -10,7 +10,7 @@ export const GroupingGuide = ({ groups, variables, numVariables, grid, getColumn
 
     useEffect(() => {
         return () => cancel();
-    }, []);
+    }, [cancel]);
 
     const explanations = generateExplanations(groups, variables, numVariables, grid);
 
