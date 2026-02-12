@@ -809,20 +809,28 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
                 />
               )}
 
-              {gate.inputs > 0 && (
+              {gate.inputs === 2 && (
                 <>
                   <div
                     className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
                     style={{ top: '35%' }}
                     onClick={() => completeConnection(gate, 0)}
                   />
-                  {gate.inputs === 2 && (
-                    <div
-                      className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
-                      style={{ top: '65%' }}
-                      onClick={() => completeConnection(gate, 1)}
-                    />
-                  )}
+                  <div
+                    className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
+                    style={{ top: '65%' }}
+                    onClick={() => completeConnection(gate, 1)}
+                  />
+                </>
+              )}
+
+              {gate.inputs === 1 && (
+                <>
+                  <div
+                    className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
+                    style={{ top: '50%' }}
+                    onClick={() => completeConnection(gate, 0)}
+                  />
                 </>
               )}
             </div>
