@@ -24,7 +24,6 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const animationFrameRef = useRef(null);
 
   const GRID_SIZE = 20;
   const SNAP_TO_GRID = true;
@@ -69,7 +68,13 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     return map;
   }, [gates]);
 
-  const evaluateGate = useCallback((gate, memo = new Map()) => {
+  const evaluateGate = useCallback((gate, memo = new Map(), depth = 0) => {
+    // Prevent infinite recursion
+    if (depth > 100) {
+      console.warn('Max recursion depth reached in evaluateGate');
+      return false;
+    }
+
     if (!gate) return false;
 
     if (memo.has(gate.id)) {
@@ -88,7 +93,7 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
       if (wire.toId === gate.id) {
         const fromGate = gateMap.get(wire.fromId);
         if (fromGate) {
-          const sourceOutput = evaluateGate(fromGate, memo);
+          const sourceOutput = evaluateGate(fromGate, memo, depth + 1);
           inputs[wire.toIndex] = sourceOutput;
         }
       }
@@ -135,72 +140,92 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    try {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    // Save context and apply transformations
-    ctx.save();
-    ctx.translate(panOffset.x, panOffset.y);
-    ctx.scale(zoom, zoom);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const memo = new Map();
+      // Save context and apply transformations
+      ctx.save();
+      ctx.translate(panOffset.x, panOffset.y);
+      ctx.scale(zoom, zoom);
 
-    wires.forEach(wire => {
-      const fromGate = gateMap.get(wire.fromId);
-      const toGate = gateMap.get(wire.toId);
+      const memo = new Map();
 
-      if (!fromGate || !toGate) return;
+      wires.forEach(wire => {
+        try {
+          const fromGate = gateMap.get(wire.fromId);
+          const toGate = gateMap.get(wire.toId);
 
-      const fromX = fromGate.x + 120;
-      const fromY = fromGate.y + 50;
+          if (!fromGate || !toGate) return;
 
-      const toInputCount = toGate.inputs;
-      const toX = toGate.x;
-      const toY = toGate.y + (toInputCount === 1 ? 50 : (wire.toIndex === 0 ? 35 : 65));
+          // Output point is always at the right-center of the gate
+          const fromX = fromGate.x + 120;
+          const fromY = fromGate.y + 50;
 
-      const isActive = evaluateGate(fromGate, memo);
+          // Input point position depends on number of inputs and which input
+          const toX = toGate.x;
+          let toY;
 
-      ctx.strokeStyle = isActive ? '#00ff88' : '#334155';
-      ctx.lineWidth = 3 / zoom; // Scale line width inversely with zoom
-      ctx.shadowBlur = isActive ? 12 / zoom : 0;
-      ctx.shadowColor = isActive ? '#00ff88' : 'transparent';
+          if (toGate.inputs === 1) {
+            // Single input - centered
+            toY = toGate.y + 50;
+          } else if (toGate.inputs === 2) {
+            // Two inputs - top and bottom
+            toY = toGate.y + (wire.toIndex === 0 ? 35 : 65);
+          } else {
+            // Default to center
+            toY = toGate.y + 50;
+          }
 
-      ctx.beginPath();
-      ctx.moveTo(fromX, fromY);
+          const isActive = evaluateGate(fromGate, memo);
 
-      const dx = toX - fromX;
-      const dy = toY - fromY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+          ctx.strokeStyle = isActive ? '#00ff88' : '#334155';
+          ctx.lineWidth = 3 / zoom;
+          ctx.shadowBlur = isActive ? 12 / zoom : 0;
+          ctx.shadowColor = isActive ? '#00ff88' : 'transparent';
 
-      const controlDistance = Math.min(Math.abs(dx) / 2, distance / 3);
+          ctx.beginPath();
+          ctx.moveTo(fromX, fromY);
 
-      ctx.bezierCurveTo(
-        fromX + controlDistance, fromY,
-        toX - controlDistance, toY,
-        toX, toY
-      );
+          const dx = toX - fromX;
+          const dy = toY - fromY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
 
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    });
+          const controlDistance = Math.min(Math.abs(dx) / 2, distance / 3);
 
-    // Restore context
-    ctx.restore();
+          ctx.bezierCurveTo(
+            fromX + controlDistance, fromY,
+            toX - controlDistance, toY,
+            toX, toY
+          );
+
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        } catch (wireError) {
+          console.error('Error drawing wire:', wireError);
+        }
+      });
+
+      // Restore context
+      ctx.restore();
+    } catch (error) {
+      console.error('Error in drawWires:', error);
+    }
   }, [wires, gateMap, evaluateGate, zoom, panOffset]);
 
+  // Redraw wires when dependencies change
   useEffect(() => {
-    const animate = () => {
-      drawWires();
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+    const redraw = () => {
+      try {
+        drawWires();
+      } catch (error) {
+        console.error('Error redrawing wires:', error);
       }
     };
+
+    redraw();
   }, [drawWires]);
 
   useEffect(() => {
@@ -208,10 +233,14 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     const container = containerRef.current;
     if (!canvas || !container) return;
 
+    let resizeTimeout;
     const resizeCanvas = () => {
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
-      drawWires();
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        drawWires();
+      }, 100); // Debounce resize by 100ms
     };
 
     resizeCanvas();
@@ -219,6 +248,7 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      clearTimeout(resizeTimeout);
     };
   }, [drawWires]);
 
@@ -470,20 +500,33 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     );
   };
 
-  const evaluateGateWithGates = useCallback((gate, gatesArray) => {
+  const evaluateGateWithGates = useCallback((gate, gatesArray, depth = 0, visited = new Set()) => {
+    if (depth > 100) {
+      console.warn('Max recursion depth in evaluateGateWithGates');
+      return false;
+    }
+
     if (!gate) return false;
+
+    // Detect circular dependencies
+    if (visited.has(gate.id)) {
+      console.warn('Circular dependency detected in circuit');
+      return false;
+    }
 
     if (gate.type === 'INPUT') {
       return gate.inputValues[0] || false;
     }
 
     const inputs = [];
+    const newVisited = new Set(visited);
+    newVisited.add(gate.id);
 
     wires.forEach(wire => {
       if (wire.toId === gate.id) {
         const fromGate = gatesArray.find(g => g.id === wire.fromId);
         if (fromGate) {
-          const sourceOutput = evaluateGateWithGates(fromGate, gatesArray);
+          const sourceOutput = evaluateGateWithGates(fromGate, gatesArray, depth + 1, newVisited);
           inputs[wire.toIndex] = sourceOutput;
         }
       }
@@ -770,7 +813,7 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
                 <>
                   <div
                     className={`connection-point input-point ${connectingFrom ? 'active' : ''}`}
-                    style={{ top: '50%' }}
+                    style={{ top: '35%' }}
                     onClick={() => completeConnection(gate, 0)}
                   />
                   {gate.inputs === 2 && (
