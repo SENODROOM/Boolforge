@@ -17,6 +17,8 @@ const Home = () => {
 
           <nav className="home-nav">
             <Link to="/boolforge" className="home-nav-link">Circuit Forge</Link>
+            <Link to="/gates" className="home-nav-link">Gates</Link>
+            <Link to="/timing-diagrams" className="home-nav-link">Timing</Link>
             <Link to="/numbersystemcalculator" className="home-nav-link">Number Calculator</Link>
             <Link to="/numberconversation" className="home-nav-link">Base Converter</Link>
             <Link to="/binaryrepresentation" className="home-nav-link">Binary Visualizer</Link>
@@ -50,6 +52,25 @@ const Home = () => {
         </section>
 
         <section className="home-grid">
+          <article className="home-card">
+            <h3>Boolean Algebra</h3>
+            <p>
+              Foundations of digital logic: variables, identities, duality, SOP/POS, minterms and maxterms.
+            </p>
+            <div className="home-card-links">
+              <Link to="/boolean-algebra" className="home-card-link">Overview</Link>
+              <Link to="/boolean-identities" className="home-card-link">Identities</Link>
+              <Link to="/duality-principle" className="home-card-link">Duality</Link>
+              <Link to="/boolean-laws" className="home-card-link">Laws</Link>
+              <Link to="/consensus-theorem" className="home-card-link">Consensus</Link>
+              <Link to="/complement" className="home-card-link">Complement</Link>
+              <Link to="/standard-forms" className="home-card-link">SOP & POS</Link>
+              <Link to="/minterms" className="home-card-link">Minterms</Link>
+              <Link to="/maxterms" className="home-card-link">Maxterms</Link>
+              <Link to="/minterms-maxterms" className="home-card-link">Relation</Link>
+            </div>
+          </article>
+
           <article className="home-card">
             <h3>Circuit Forge</h3>
             <p>

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import ToolLayout from '../components/ToolLayout';
+import ControlPanel from '../components/ControlPanel';
+import ControlGroup from '../components/ControlGroup';
+import ResultCard from '../components/ResultCard';
 import ExplanationBlock from '../components/ExplanationBlock';
 
 const extendBits = (value, targetBits, mode) => {
@@ -50,9 +53,8 @@ const BitExtension = () => {
       title="Bit Extension"
       subtitle="Compare unsigned zero‑extension vs signed two's‑complement sign extension"
     >
-        <div className="control-panel">
-          <div className="control-group">
-            <label className="control-label">Binary value</label>
+        <ControlPanel>
+          <ControlGroup label="Binary value">
             <input
               type="text"
               className="control-input"
@@ -65,10 +67,9 @@ const BitExtension = () => {
               }}
               placeholder="e.g. 1010"
             />
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">Target bit‑width</label>
+          </ControlGroup>
+ 
+          <ControlGroup label="Target bit‑width">
             <input
               type="number"
               className="control-input"
@@ -77,10 +78,9 @@ const BitExtension = () => {
               min="1"
               max="32"
             />
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">Mode</label>
+          </ControlGroup>
+ 
+          <ControlGroup label="Mode">
             <select
               className="control-select"
               value={mode}
@@ -89,13 +89,11 @@ const BitExtension = () => {
               <option value="signed">Signed (two&apos;s complement)</option>
               <option value="unsigned">Unsigned (zero‑extension)</option>
             </select>
-          </div>
-        </div>
+          </ControlGroup>
+        </ControlPanel>
 
         {hasInput && (
-          <div className="results-section fade-in">
-            <div className="result-card">
-              <h2 className="result-title">Extension Result</h2>
+          <ResultCard title="Extension Result">
 
               <ExplanationBlock title="How the bits change">
                 {result && result.error && (
@@ -129,8 +127,7 @@ const BitExtension = () => {
                   </p>
                 </>
               </ExplanationBlock>
-            </div>
-          </div>
+          </ResultCard>
         )}
     </ToolLayout>
   );

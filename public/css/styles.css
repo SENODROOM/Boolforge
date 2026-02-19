@@ -1879,7 +1879,37 @@ td:hover {
     padding: 2rem;
     border-radius: var(--border-radius);
     border: 1px solid var(--wire-off);
+    margin-bottom: 30px;
     box-shadow: var(--shadow-soft);
+}
+
+.identity-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.identity-card {
+    background: var(--bg-medium);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
+}
+
+.identity-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-border-light);
+}
+
+.identity-card .explanation-title {
+    margin-bottom: 8px;
+}
+
+.identity-card .var-list {
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
 }
 
 .explanation-title {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ToolLayout from '../components/ToolLayout';
+import ControlPanel from '../components/ControlPanel';
+import ControlGroup from '../components/ControlGroup';
 import ExplanationBlock from '../components/ExplanationBlock';
 
 const NumberSystemCalculator = () => {
@@ -474,39 +476,35 @@ const NumberSystemCalculator = () => {
             title="Number System Calculator"
             subtitle="Visual arithmetic across different bases"
         >
-            <div className="control-panel">
-                <div className="control-group">
-                    <label className="control-label">Number System</label>
+            <ControlPanel>
+                <ControlGroup label="Number System">
                     <select className="control-select" value={numberSystem} onChange={e => { setNumberSystem(e.target.value); setInput1(''); setInput2(''); setOperation(''); }}>
                         <option value="">Select a number system...</option>
                         {numberSystems.map(sys => <option key={sys.value} value={sys.value}>{sys.label}</option>)}
                     </select>
-                </div>
+                </ControlGroup>
 
                 {numberSystem === 'binary' && (
-                    <div className="control-group fade-in">
-                        <label className="control-label">Binary Representation</label>
+                    <ControlGroup label="Binary Representation" className="fade-in">
                         <select className="control-select" value={binaryRepresentation} onChange={e => setBinaryRepresentation(e.target.value)}>
                             {binaryRepresentations.map(rep => <option key={rep.value} value={rep.value}>{rep.label}</option>)}
                         </select>
                         <p className="hint">Use up to 8 bits (automatically sign-extended/padded for signed interpretation).</p>
-                    </div>
+                    </ControlGroup>
                 )}
 
                 {numberSystem && (
-                    <div className="control-group fade-in">
-                        <label className="control-label">Operation</label>
+                    <ControlGroup label="Operation" className="fade-in">
                         <select className="control-select" value={operation} onChange={e => setOperation(e.target.value)}>
                             <option value="">Select an operation...</option>
                             {operations.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
                         </select>
-                    </div>
+                    </ControlGroup>
                 )}
 
                 {operation && (
                     <div className="input-group fade-in">
-                        <div className="control-group">
-                            <label className="control-label">First Number</label>
+                        <ControlGroup label="First Number">
                             <input
                                 type="text"
                                 className="control-input"
@@ -520,10 +518,9 @@ const NumberSystemCalculator = () => {
                                 }}
                                 placeholder={`Enter ${numberSystem} number...`}
                             />
-                        </div>
+                        </ControlGroup>
 
-                        <div className="control-group">
-                            <label className="control-label">Second Number</label>
+                        <ControlGroup label="Second Number">
                             <input
                                 type="text"
                                 className="control-input"
@@ -537,10 +534,10 @@ const NumberSystemCalculator = () => {
                                 }}
                                 placeholder={`Enter ${numberSystem} number...`}
                             />
-                        </div>
+                        </ControlGroup>
                     </div>
                 )}
-            </div>
+            </ControlPanel>
 
             {operation && (
                 <div className="controls-row">

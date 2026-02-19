@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import ToolLayout from '../components/ToolLayout';
+import ControlPanel from '../components/ControlPanel';
+import ControlGroup from '../components/ControlGroup';
+import ResultCard from '../components/ResultCard';
 import ExplanationBlock from '../components/ExplanationBlock';
 
 const countSignificantDigits = (value) => {
@@ -75,9 +78,8 @@ const SignificantDigits = () => {
       title="Significant Digits Explorer"
       subtitle="Count significant figures, MSD, and LSD for any number"
     >
-        <div className="control-panel">
-          <div className="control-group">
-            <label className="control-label">Enter a number</label>
+        <ControlPanel>
+          <ControlGroup label="Enter a number">
             <input
               type="text"
               className="control-input"
@@ -85,13 +87,11 @@ const SignificantDigits = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Examples: 0.004500 , 1200 , 3.40 , 6.02e23"
             />
-          </div>
-        </div>
+          </ControlGroup>
+        </ControlPanel>
 
         {input && (
-          <div className="results-section fade-in">
-            <div className="result-card">
-              <h2 className="result-title">Significant Digit Analysis</h2>
+          <ResultCard title="Significant Digit Analysis">
 
               <ExplanationBlock title="Result Summary">
                 {result.count === 0 ? (
@@ -129,8 +129,7 @@ const SignificantDigits = () => {
                   <li>In scientific notation, only digits in the coefficient count as significant.</li>
                 </ul>
               </ExplanationBlock>
-            </div>
-          </div>
+          </ResultCard>
         )}
     </ToolLayout>
   );
