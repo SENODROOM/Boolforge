@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ToolLayout from '../components/ToolLayout';
+import ExplanationBlock from '../components/ExplanationBlock';
 
 const toAsciiRows = (text) => {
   const rows = [];
@@ -31,27 +33,20 @@ const ASCIINotation = () => {
   const rows = input ? toAsciiRows(input) : [];
 
   return (
-    <div className="calculator-container">
-      <div className="grid-background"></div>
-
-      <header className="header">
-        <div className="header-content">
-          <h1 className="title">ASCII Notation</h1>
-          <p className="subtitle">See decimal, hex, and binary codes for characters</p>
-        </div>
-      </header>
-
-      <div className="main-content">
+    <ToolLayout
+      title="ASCII Notation"
+      subtitle="See decimal, hex, and binary codes for characters"
+    >
         <div className="control-panel">
           <div className="control-group">
             <label className="control-label">Text</label>
-            <input
-              type="text"
-              className="control-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a word or phrase, e.g. Bool"
-            />
+          <textarea
+            className="control-input"
+            rows={3}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a word or phrase, e.g. Bool"
+          />
           </div>
         </div>
 
@@ -60,9 +55,8 @@ const ASCIINotation = () => {
             <div className="result-card">
               <h2 className="result-title">Character Codes</h2>
 
-              <div className="explanation">
-                <h3 className="explanation-title">Per‑character breakdown</h3>
-                <div className="explanation-content">
+              <ExplanationBlock title="Per‑character breakdown">
+                <>
                   <p className="explanation-intro">
                     ASCII assigns each character a unique{' '}
                     <span className="highlight">7‑bit integer code</span>, usually shown in decimal,
@@ -92,23 +86,19 @@ const ASCIINotation = () => {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              </div>
+                </>
+              </ExplanationBlock>
 
-              <div className="explanation">
-                <h3 className="explanation-title">Why 7 bits?</h3>
-                <div className="explanation-content">
-                  <p>
-                    Classic ASCII uses values from 0–127 (2⁷ − 1), fitting neatly into 7 bits. In practice it is
-                    stored in 8‑bit bytes, leaving one bit unused or used for extended character sets.
-                  </p>
-                </div>
-              </div>
+              <ExplanationBlock title="Why 7 bits?">
+                <p>
+                  Classic ASCII uses values from 0–127 (2⁷ − 1), fitting neatly into 7 bits. In practice it is
+                  stored in 8‑bit bytes, leaving one bit unused or used for extended character sets.
+                </p>
+              </ExplanationBlock>
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ToolLayout>
   );
 };
 

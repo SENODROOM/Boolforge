@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ToolLayout from '../components/ToolLayout';
+import ExplanationBlock from '../components/ExplanationBlock';
 
 const NumberSystemCalculator = () => {
     const [numberSystem, setNumberSystem] = useState('');
@@ -455,18 +457,23 @@ const NumberSystemCalculator = () => {
         );
     };
 
+    const handleClear = () => {
+        setInput1('');
+        setInput2('');
+        setResult(null);
+        setSteps([]);
+    };
+
+    const handleSwap = () => {
+        setInput1(input2);
+        setInput2(input1);
+    };
+
     return (
-        <div className="calculator-container">
-            <div className="grid-background"></div>
-
-            <header className="header">
-                <div className="header-content">
-                    <h1 className="title">Number System Calculator</h1>
-                    <p className="subtitle">Visual arithmetic across different bases</p>
-                </div>
-            </header>
-
-            <div className="main-content">
+        <ToolLayout
+            title="Number System Calculator"
+            subtitle="Visual arithmetic across different bases"
+        >
                 <div className="control-panel">
                     <div className="control-group">
                         <label className="control-label">Number System</label>
@@ -535,17 +542,29 @@ const NumberSystemCalculator = () => {
                     )}
                 </div>
 
+                {operation && (
+                    <div className="controls-row">
+                        <button className="btn" type="button" onClick={handleSwap}>
+                            Swap Inputs
+                        </button>
+                        <button className="btn danger" type="button" onClick={handleClear}>
+                            Clear
+                        </button>
+                    </div>
+                )}
+
                 {result && (
                     <div className="results-section fade-in">
                         <div className="result-card">
                             <h2 className="result-title">Calculation Result</h2>
-                            {renderResult()}
+                            <ExplanationBlock>
+                                {renderResult()}
+                            </ExplanationBlock>
                             {renderVisualization()}
                         </div>
                     </div>
                 )}
-            </div>
-        </div>
+        </ToolLayout>
     );
 };
 

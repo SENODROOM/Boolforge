@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ToolLayout from '../components/ToolLayout';
+import ExplanationBlock from '../components/ExplanationBlock';
 
 const extendBits = (value, targetBits, mode) => {
   if (!/^[01]+$/.test(value)) {
@@ -44,17 +46,10 @@ const BitExtension = () => {
   const result = hasInput ? extendBits(binary, bits, mode === 'unsigned' ? 'unsigned' : 'signed') : null;
 
   return (
-    <div className="calculator-container">
-      <div className="grid-background"></div>
-
-      <header className="header">
-        <div className="header-content">
-          <h1 className="title">Bit Extension</h1>
-          <p className="subtitle">Compare unsigned zero‑extension vs signed two&apos;s‑complement sign extension</p>
-        </div>
-      </header>
-
-      <div className="main-content">
+    <ToolLayout
+      title="Bit Extension"
+      subtitle="Compare unsigned zero‑extension vs signed two's‑complement sign extension"
+    >
         <div className="control-panel">
           <div className="control-group">
             <label className="control-label">Binary value</label>
@@ -102,31 +97,27 @@ const BitExtension = () => {
             <div className="result-card">
               <h2 className="result-title">Extension Result</h2>
 
-              <div className="explanation">
-                <h3 className="explanation-title">How the bits change</h3>
-                <div className="explanation-content">
-                  {result && result.error && (
+              <ExplanationBlock title="How the bits change">
+                {result && result.error && (
+                  <p className="explanation-intro">
+                    <span className="highlight">Error:</span> {result.error}
+                  </p>
+                )}
+                {result && !result.error && (
+                  <>
                     <p className="explanation-intro">
-                      <span className="highlight">Error:</span> {result.error}
+                      <span className="highlight">Original:</span> {result.original} ({result.original.length} bits)
                     </p>
-                  )}
-                  {result && !result.error && (
-                    <>
-                      <p className="explanation-intro">
-                        <span className="highlight">Original:</span> {result.original} ({result.original.length} bits)
-                      </p>
-                      <p className="explanation-intro">
-                        <span className="highlight">Extended:</span> {result.extended} ({bits} bits)
-                      </p>
-                      <p>{result.explanation}</p>
-                    </>
-                  )}
-                </div>
-              </div>
+                    <p className="explanation-intro">
+                      <span className="highlight">Extended:</span> {result.extended} ({bits} bits)
+                    </p>
+                    <p>{result.explanation}</p>
+                  </>
+                )}
+              </ExplanationBlock>
 
-              <div className="explanation">
-                <h3 className="explanation-title">Signed vs unsigned intuition</h3>
-                <div className="explanation-content">
+              <ExplanationBlock title="Signed vs unsigned intuition">
+                <>
                   <p>
                     With <span className="highlight">unsigned</span> numbers, the leftmost bit is just another
                     magnitude bit, so new bits must be <strong>0</strong> to avoid changing the value.
@@ -136,13 +127,12 @@ const BitExtension = () => {
                     encodes the sign. Repeating it into new higher‑order bits keeps the encoded integer the same, even
                     though the word size grows.
                   </p>
-                </div>
-              </div>
+                </>
+              </ExplanationBlock>
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ToolLayout>
   );
 };
 

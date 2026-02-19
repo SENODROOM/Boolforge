@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ToolLayout from '../components/ToolLayout';
+import ExplanationBlock from '../components/ExplanationBlock';
 
 const countSignificantDigits = (value) => {
   if (!value || /^\s*$/.test(value)) return { count: 0, msd: null, lsd: null, cleaned: '' };
@@ -69,17 +71,10 @@ const SignificantDigits = () => {
   const result = countSignificantDigits(input);
 
   return (
-    <div className="calculator-container">
-      <div className="grid-background"></div>
-
-      <header className="header">
-        <div className="header-content">
-          <h1 className="title">Significant Digits Explorer</h1>
-          <p className="subtitle">Count significant figures, MSD, and LSD for any number</p>
-        </div>
-      </header>
-
-      <div className="main-content">
+    <ToolLayout
+      title="Significant Digits Explorer"
+      subtitle="Count significant figures, MSD, and LSD for any number"
+    >
         <div className="control-panel">
           <div className="control-group">
             <label className="control-label">Enter a number</label>
@@ -98,8 +93,7 @@ const SignificantDigits = () => {
             <div className="result-card">
               <h2 className="result-title">Significant Digit Analysis</h2>
 
-              <div className="explanation">
-                <h3 className="explanation-title">Result Summary</h3>
+              <ExplanationBlock title="Result Summary">
                 {result.count === 0 ? (
                   <p className="explanation-intro">
                     <span className="highlight">The input does not contain any significant digits</span> under standard
@@ -110,41 +104,35 @@ const SignificantDigits = () => {
                     <p className="explanation-intro">
                       <span className="highlight">Total significant digits:</span> {result.count}
                     </p>
-                    <div className="explanation-content">
-                      <p>
-                        <span className="highlight">Most Significant Digit (MSD):</span>{' '}
-                        {result.msd}
-                      </p>
-                      <p>
-                        <span className="highlight">Least Significant Digit (LSD):</span>{' '}
-                        {result.lsd}
-                      </p>
-                      <p>
-                        We strip off non-significant leading and trailing zeros and focus on the{' '}
-                        <span className="highlight">meaningful digits</span> that affect the measured precision.
-                      </p>
-                    </div>
+                    <p>
+                      <span className="highlight">Most Significant Digit (MSD):</span>{' '}
+                      {result.msd}
+                    </p>
+                    <p>
+                      <span className="highlight">Least Significant Digit (LSD):</span>{' '}
+                      {result.lsd}
+                    </p>
+                    <p>
+                      We strip off non-significant leading and trailing zeros and focus on the{' '}
+                      <span className="highlight">meaningful digits</span> that affect the measured precision.
+                    </p>
                   </>
                 )}
-              </div>
+              </ExplanationBlock>
 
-              <div className="explanation">
-                <h3 className="explanation-title">Quick Rules</h3>
-                <div className="explanation-content">
-                  <ul>
-                    <li>All non‑zero digits are always significant.</li>
-                    <li>Zeros between non‑zero digits are significant (e.g. 1005 → 4 sig. digits).</li>
-                    <li>Leading zeros are never significant (e.g. 0.0034 → 2 sig. digits).</li>
-                    <li>Trailing zeros after a decimal point are significant (e.g. 2.300 → 4 sig. digits).</li>
-                    <li>In scientific notation, only digits in the coefficient count as significant.</li>
-                  </ul>
-                </div>
-              </div>
+              <ExplanationBlock title="Quick Rules">
+                <ul>
+                  <li>All non‑zero digits are always significant.</li>
+                  <li>Zeros between non‑zero digits are significant (e.g. 1005 → 4 sig. digits).</li>
+                  <li>Leading zeros are never significant (e.g. 0.0034 → 2 sig. digits).</li>
+                  <li>Trailing zeros after a decimal point are significant (e.g. 2.300 → 4 sig. digits).</li>
+                  <li>In scientific notation, only digits in the coefficient count as significant.</li>
+                </ul>
+              </ExplanationBlock>
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ToolLayout>
   );
 };
 

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ToolLayout from '../components/ToolLayout';
+import ExplanationBlock from '../components/ExplanationBlock';
 
 const toBcdDigits = (value) => {
   if (!/^[0-9]+$/.test(value)) {
@@ -15,17 +17,10 @@ const BCDNotation = () => {
   const digits = input ? toBcdDigits(input) : null;
 
   return (
-    <div className="calculator-container">
-      <div className="grid-background"></div>
-
-      <header className="header">
-        <div className="header-content">
-          <h1 className="title">BCD Notation</h1>
-          <p className="subtitle">Binary Coded Decimal representation of decimal digits</p>
-        </div>
-      </header>
-
-      <div className="main-content">
+    <ToolLayout
+      title="BCD Notation"
+      subtitle="Binary Coded Decimal representation of decimal digits"
+    >
         <div className="control-panel">
           <div className="control-group">
             <label className="control-label">Decimal number</label>
@@ -49,15 +44,13 @@ const BCDNotation = () => {
             <div className="result-card">
               <h2 className="result-title">BCD Conversion</h2>
 
-              <div className="explanation">
-                <h3 className="explanation-title">Per‑digit encoding</h3>
-                <div className="explanation-content">
-                  {digits ? (
-                    <>
-                      <p className="explanation-intro">
-                        In BCD, each decimal digit is stored separately using{' '}
-                        <span className="highlight">4 binary bits</span>.
-                      </p>
+              <ExplanationBlock title="Per‑digit encoding">
+                {digits ? (
+                  <>
+                    <p className="explanation-intro">
+                      In BCD, each decimal digit is stored separately using{' '}
+                      <span className="highlight">4 binary bits</span>.
+                    </p>
                       <table className="binary-table">
                         <thead className="binary-table-header">
                           <tr>
@@ -83,13 +76,11 @@ const BCDNotation = () => {
                       spaces, or non‑digit characters.
                     </p>
                   )}
-                </div>
-              </div>
+              </ExplanationBlock>
 
               {digits && (
-                <div className="explanation">
-                  <h3 className="explanation-title">Combined BCD word</h3>
-                  <div className="explanation-content">
+                <ExplanationBlock title="Combined BCD word">
+                  <>
                     <p className="explanation-intro">
                       Joining all digit blocks left‑to‑right gives the full BCD representation.
                     </p>
@@ -102,14 +93,13 @@ const BCDNotation = () => {
                       <span className="highlight">decimal digit boundaries</span>, which is useful in display
                       hardware and decimal arithmetic.
                     </p>
-                  </div>
-                </div>
+                  </>
+                </ExplanationBlock>
               )}
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ToolLayout>
   );
 };
 

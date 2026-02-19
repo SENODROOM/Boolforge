@@ -1749,6 +1749,13 @@ td:hover {
     gap: 2rem;
 }
 
+.controls-row {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
 .result-card {
     background: var(--bg-medium);
     padding: 2rem;
@@ -1901,6 +1908,13 @@ td:hover {
     padding: 0.125rem 0.5rem;
     background: rgba(0, 255, 136, 0.1);
     border-radius: 4px;
+}
+
+.hint {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.9;
 }
 
 .step-detail {
