@@ -279,7 +279,7 @@ const NumberSystemCalculator = () => {
             console.error(err);
             setResult({ error: 'Invalid input or calculation' });
         }
-    }, [input1, input2, operation, numberSystem, performAddition, performSubtraction, performMultiplication, performBinaryOperation]);
+    }, [input1, input2, operation, numberSystem, performAddition, performSubtraction, performMultiplication, performBinaryOperation, performDivision]);
 
     useEffect(() => {
         handleCalculate();
@@ -402,7 +402,7 @@ const NumberSystemCalculator = () => {
         const digits = buildVisualDigits();
         if (!digits) return null;
 
-        const { paddedTop, paddedBottom, paddedRes, carryRow, borrowRow } = digits;
+        const { paddedTop, paddedBottom, paddedRes, carryRow } = digits;
         const opSymbol = getOperatorSymbol();
 
         return (
@@ -474,96 +474,96 @@ const NumberSystemCalculator = () => {
             title="Number System Calculator"
             subtitle="Visual arithmetic across different bases"
         >
-                <div className="control-panel">
-                    <div className="control-group">
-                        <label className="control-label">Number System</label>
-                        <select className="control-select" value={numberSystem} onChange={e => { setNumberSystem(e.target.value); setInput1(''); setInput2(''); setOperation(''); }}>
-                            <option value="">Select a number system...</option>
-                            {numberSystems.map(sys => <option key={sys.value} value={sys.value}>{sys.label}</option>)}
-                        </select>
-                    </div>
-
-                    {numberSystem === 'binary' && (
-                        <div className="control-group fade-in">
-                            <label className="control-label">Binary Representation</label>
-                            <select className="control-select" value={binaryRepresentation} onChange={e => setBinaryRepresentation(e.target.value)}>
-                                {binaryRepresentations.map(rep => <option key={rep.value} value={rep.value}>{rep.label}</option>)}
-                            </select>
-                            <p className="hint">Use up to 8 bits (automatically sign-extended/padded for signed interpretation).</p>
-                        </div>
-                    )}
-
-                    {numberSystem && (
-                        <div className="control-group fade-in">
-                            <label className="control-label">Operation</label>
-                            <select className="control-select" value={operation} onChange={e => setOperation(e.target.value)}>
-                                <option value="">Select an operation...</option>
-                                {operations.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-                            </select>
-                        </div>
-                    )}
-
-                    {operation && (
-                        <div className="input-group fade-in">
-                            <div className="control-group">
-                                <label className="control-label">First Number</label>
-                                <input
-                                    type="text"
-                                    className="control-input"
-                                    value={input1}
-                                    onChange={e => {
-                                        let val = e.target.value.toUpperCase();
-                                        if (numberSystem === 'binary') {
-                                            if (val.length > 8) val = val.slice(0, 8);
-                                        }
-                                        if (isValidInput(val, numberSystem)) setInput1(val);
-                                    }}
-                                    placeholder={`Enter ${numberSystem} number...`}
-                                />
-                            </div>
-
-                            <div className="control-group">
-                                <label className="control-label">Second Number</label>
-                                <input
-                                    type="text"
-                                    className="control-input"
-                                    value={input2}
-                                    onChange={e => {
-                                        let val = e.target.value.toUpperCase();
-                                        if (numberSystem === 'binary') {
-                                            if (val.length > 8) val = val.slice(0, 8);
-                                        }
-                                        if (isValidInput(val, numberSystem)) setInput2(val);
-                                    }}
-                                    placeholder={`Enter ${numberSystem} number...`}
-                                />
-                            </div>
-                        </div>
-                    )}
+            <div className="control-panel">
+                <div className="control-group">
+                    <label className="control-label">Number System</label>
+                    <select className="control-select" value={numberSystem} onChange={e => { setNumberSystem(e.target.value); setInput1(''); setInput2(''); setOperation(''); }}>
+                        <option value="">Select a number system...</option>
+                        {numberSystems.map(sys => <option key={sys.value} value={sys.value}>{sys.label}</option>)}
+                    </select>
                 </div>
 
-                {operation && (
-                    <div className="controls-row">
-                        <button className="btn" type="button" onClick={handleSwap}>
-                            Swap Inputs
-                        </button>
-                        <button className="btn danger" type="button" onClick={handleClear}>
-                            Clear
-                        </button>
+                {numberSystem === 'binary' && (
+                    <div className="control-group fade-in">
+                        <label className="control-label">Binary Representation</label>
+                        <select className="control-select" value={binaryRepresentation} onChange={e => setBinaryRepresentation(e.target.value)}>
+                            {binaryRepresentations.map(rep => <option key={rep.value} value={rep.value}>{rep.label}</option>)}
+                        </select>
+                        <p className="hint">Use up to 8 bits (automatically sign-extended/padded for signed interpretation).</p>
                     </div>
                 )}
 
-                {result && (
-                    <div className="results-section fade-in">
-                        <div className="result-card">
-                            <h2 className="result-title">Calculation Result</h2>
-                            <ExplanationBlock>
-                                {renderResult()}
-                            </ExplanationBlock>
-                            {renderVisualization()}
+                {numberSystem && (
+                    <div className="control-group fade-in">
+                        <label className="control-label">Operation</label>
+                        <select className="control-select" value={operation} onChange={e => setOperation(e.target.value)}>
+                            <option value="">Select an operation...</option>
+                            {operations.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
+                        </select>
+                    </div>
+                )}
+
+                {operation && (
+                    <div className="input-group fade-in">
+                        <div className="control-group">
+                            <label className="control-label">First Number</label>
+                            <input
+                                type="text"
+                                className="control-input"
+                                value={input1}
+                                onChange={e => {
+                                    let val = e.target.value.toUpperCase();
+                                    if (numberSystem === 'binary') {
+                                        if (val.length > 8) val = val.slice(0, 8);
+                                    }
+                                    if (isValidInput(val, numberSystem)) setInput1(val);
+                                }}
+                                placeholder={`Enter ${numberSystem} number...`}
+                            />
+                        </div>
+
+                        <div className="control-group">
+                            <label className="control-label">Second Number</label>
+                            <input
+                                type="text"
+                                className="control-input"
+                                value={input2}
+                                onChange={e => {
+                                    let val = e.target.value.toUpperCase();
+                                    if (numberSystem === 'binary') {
+                                        if (val.length > 8) val = val.slice(0, 8);
+                                    }
+                                    if (isValidInput(val, numberSystem)) setInput2(val);
+                                }}
+                                placeholder={`Enter ${numberSystem} number...`}
+                            />
                         </div>
                     </div>
                 )}
+            </div>
+
+            {operation && (
+                <div className="controls-row">
+                    <button className="btn" type="button" onClick={handleSwap}>
+                        Swap Inputs
+                    </button>
+                    <button className="btn danger" type="button" onClick={handleClear}>
+                        Clear
+                    </button>
+                </div>
+            )}
+
+            {result && (
+                <div className="results-section fade-in">
+                    <div className="result-card">
+                        <h2 className="result-title">Calculation Result</h2>
+                        <ExplanationBlock>
+                            {renderResult()}
+                        </ExplanationBlock>
+                        {renderVisualization()}
+                    </div>
+                </div>
+            )}
         </ToolLayout>
     );
 };
