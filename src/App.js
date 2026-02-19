@@ -2,9 +2,14 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // PAGES:
+import Home from './pages/Home';
 import Boolforge from './pages/Boolforge';
+import SignificantDigits from './pages/SignificantDigits';
+import BCDNotation from './pages/BCDNotation';
+import ASCIINotation from './pages/ASCIINotation';
+import BitExtension from './pages/BitExtension';
 
-// UTILS:
+// UTILS / OTHER TOOLS:
 import ScrollToTop from './utils/ScrollToTop';
 import NumberConverter from './pages/NumberConversation';
 import NumberSystemCalculator from './pages/NumberSystemCalculator';
@@ -20,7 +25,12 @@ function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
-          <Route path="/" element={<Boolforge />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/boolforge" element={<Boolforge />} />
+          <Route path="/significant-digits" element={<SignificantDigits />} />
+          <Route path="/bcd-notation" element={<BCDNotation />} />
+          <Route path="/ascii-notation" element={<ASCIINotation />} />
+          <Route path="/bit-extension" element={<BitExtension />} />
           <Route path="/book" element={<ProblemSolver />} />
           <Route path="/numberconversation" element={<NumberConverter />} />
           <Route path="/numbersystemcalculator" element={<NumberSystemCalculator />} />

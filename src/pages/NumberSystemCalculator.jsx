@@ -24,7 +24,8 @@ const NumberSystemCalculator = () => {
     const operations = [
         { value: 'addition', label: 'Addition (+)' },
         { value: 'subtraction', label: 'Subtraction (−)' },
-        { value: 'multiplication', label: 'Multiplication (×)' }
+        { value: 'multiplication', label: 'Multiplication (×)' },
+        { value: 'division', label: 'Division (÷)' }
     ];
 
     const getBase = (system) => ({ decimal: 10, binary: 2, octal: 8, hexadecimal: 16 }[system]);
@@ -157,6 +158,31 @@ const NumberSystemCalculator = () => {
         return { result: finalResult.replace(/^0+/, '') || '0', partialProducts, steps: stepData, decimal: decimalValue };
     }, [performAddition]);
 
+    const performDivision = useCallback((num1Str, num2Str, base) => {
+        const dec1 = toDecimal(num1Str, base);
+        const dec2 = toDecimal(num2Str, base);
+
+        if (dec2 === 0) {
+            return { error: 'Division by zero is undefined.' };
+        }
+
+        const quotientDec = Math.trunc(dec1 / dec2);
+        const remainderDec = dec1 % dec2;
+
+        const quotientStr = fromDecimal(Math.abs(quotientDec), base);
+        const signedQuotientStr = quotientDec < 0 ? '-' + quotientStr : quotientStr;
+
+        const remainderStr = fromDecimal(Math.abs(remainderDec), base);
+
+        return {
+            result: signedQuotientStr,
+            decimal: quotientDec,
+            remainder: remainderDec,
+            remainderStr,
+            steps: []
+        };
+    }, []);
+
     const performBinaryOperation = useCallback((in1, in2, op) => {
         const bits = 8;
 
@@ -191,6 +217,13 @@ const NumberSystemCalculator = () => {
             case 'addition': resultDecimal = num1 + num2; operationName = 'Addition'; break;
             case 'subtraction': resultDecimal = num1 - num2; operationName = 'Subtraction'; break;
             case 'multiplication': resultDecimal = num1 * num2; operationName = 'Multiplication'; break;
+            case 'division':
+                operationName = 'Division';
+                if (num2 === 0) {
+                    return { error: 'Division by zero is undefined.' };
+                }
+                resultDecimal = Math.trunc(num1 / num2);
+                break;
             default: resultDecimal = 0; operationName = '';
         }
 
@@ -235,10 +268,11 @@ const NumberSystemCalculator = () => {
                 if (operation === 'addition') calcResult = performAddition(n1, n2, base);
                 else if (operation === 'subtraction') calcResult = performSubtraction(n1, n2, base);
                 else if (operation === 'multiplication') calcResult = performMultiplication(n1, n2, base);
+                else if (operation === 'division') calcResult = performDivision(n1, n2, base);
             }
 
             setResult(calcResult);
-            setSteps(calcResult.steps || []);
+            setSteps((calcResult && calcResult.steps) || []);
         } catch (err) {
             console.error(err);
             setResult({ error: 'Invalid input or calculation' });
@@ -249,8 +283,83 @@ const NumberSystemCalculator = () => {
         handleCalculate();
     }, [handleCalculate]);
 
+    const getOperatorSymbol = () => {
+        if (operation === 'addition') return '+';
+        if (operation === 'subtraction') return '−';
+        if (operation === 'multiplication') return '×';
+        if (operation === 'division') return '÷';
+        return '';
+    };
+
+    const buildVisualDigits = () => {
+        if (!result || !operation) return null;
+
+        let top = '';
+        let bottom = '';
+        let res = '';
+
+        if (numberSystem === 'binary' && result.steps) {
+            const s = result.steps;
+            top = s.binary1 || '0';
+            bottom = s.binary2 || '0';
+            res = s.binaryResult || result.result || '0';
+        } else {
+            top = (input1 || '0').toString().toUpperCase();
+            bottom = (input2 || '0').toString().toUpperCase();
+            res = (result.result || '0').toString().toUpperCase();
+            if (numberSystem !== 'binary' && result.isNegative) {
+                res = '-' + res;
+            }
+        }
+
+        const maxLength = Math.max(top.length, bottom.length, res.length);
+        const paddedTop = top.padStart(maxLength, ' ');
+        const paddedBottom = bottom.padStart(maxLength, ' ');
+        const paddedRes = res.padStart(maxLength, ' ');
+
+        const carryRow = new Array(maxLength).fill('');
+        const borrowRow = new Array(maxLength).fill('');
+
+        if (operation === 'addition' && steps.length) {
+            steps.forEach(step => {
+                if (step.newCarry) {
+                    const colFromRight = step.position + 1;
+                    const idx = maxLength - 1 - colFromRight;
+                    if (idx >= 0 && idx < maxLength) {
+                        carryRow[idx] = '1';
+                    }
+                }
+            });
+        }
+
+        if (operation === 'subtraction' && steps.length) {
+            steps.forEach(step => {
+                if (step.newBorrow) {
+                    const colFromRight = step.position + 1;
+                    const idx = maxLength - 1 - colFromRight;
+                    if (idx >= 0 && idx < maxLength) {
+                        borrowRow[idx] = '1';
+                    }
+                }
+            });
+        }
+
+        return { paddedTop, paddedBottom, paddedRes, carryRow, borrowRow };
+    };
+
     const renderResult = () => {
         if (!result) return null;
+        if (result.error) {
+            return (
+                <div className="explanation">
+                    <h3 className="explanation-title">Result Summary</h3>
+                    <p className="explanation-intro">
+                        <span className="highlight">Error:</span>{' '}
+                        <span className="binary-highlight">{result.error}</span>
+                    </p>
+                </div>
+            );
+        }
 
         let displayResult = result.result || '';
         if (numberSystem !== 'binary' && result.isNegative) {
@@ -258,141 +367,96 @@ const NumberSystemCalculator = () => {
         }
 
         return (
-            <div className="result-display">
-                <p><strong>Result in {numberSystem}:</strong> <span className="binary-highlight">{displayResult}</span></p>
-                <p><strong>Decimal equivalent:</strong> {result.decimal ?? 'N/A'}</p>
+            <div className="explanation">
+                <h3 className="explanation-title">Result Summary</h3>
+                <p className="explanation-intro">
+                    <span className="highlight">Result ({numberSystem || 'n/a'}):</span>{' '}
+                    <span className="binary-highlight">{displayResult}</span>
+                </p>
+                <div className="explanation-content">
+                    <p><span className="highlight">Decimal equivalent:</span> {result.decimal ?? 'N/A'}</p>
+                    {operation === 'division' && result.remainder !== undefined && (
+                        <p>
+                            <span className="highlight">Remainder:</span>{' '}
+                            {result.remainder} {numberSystem !== 'decimal' && `(= ${result.remainderStr} in base ${getBase(numberSystem)})`}
+                        </p>
+                    )}
+                    {numberSystem === 'binary' && result.steps && (
+                        <p>
+                            Showing an 8‑bit signed interpretation using{' '}
+                            <span className="highlight">
+                                {binaryRepresentation === 'twos-complement' ? "2's complement" : 'signed magnitude'}
+                            </span>.
+                        </p>
+                    )}
+                </div>
             </div>
         );
     };
 
     const renderVisualization = () => {
-        if (!result) return null;
+        if (!result || !operation) return null;
 
-        if (numberSystem === 'binary' && result.steps) {
-            const s = result.steps;
-            return (
-                <div className="visualization">
-                    <h3>Signed Binary Operation (8-bit)</h3>
-                    <p>First number: {s.original1 || '0'} → {s.binary1} (= {s.decimal1} decimal)</p>
-                    <p>Second number: {s.original2 || '0'} → {s.binary2} (= {s.decimal2} decimal)</p>
-                    <p>{s.decimal1} {s.operation.toLowerCase()} {s.decimal2} = {result.decimal} (decimal)</p>
-                    <p>Result ({binaryRepresentation}): <span className="binary-highlight">{s.binaryResult}</span></p>
-                </div>
-            );
-        }
+        const digits = buildVisualDigits();
+        if (!digits) return null;
 
-        if (operation === 'addition') {
-            return (
-                <div className="visualization">
-                    <h3>Step-by-Step Addition</h3>
-                    <table className="steps-table">
-                        <thead>
-                            <tr>
-                                <th>Column (from right)</th>
-                                <th>Digit 1</th>
-                                <th>Digit 2</th>
-                                <th>Carry In</th>
-                                <th>Sum</th>
-                                <th>Write</th>
-                                <th>Carry Out</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {steps.map((step, i) => (
-                                <tr key={i}>
-                                    <td>{step.position + 1}</td>
-                                    <td>{step.digit1}</td>
-                                    <td>{step.digit2}</td>
-                                    <td>{step.carry}</td>
-                                    <td>{step.sum}</td>
-                                    <td>{step.resultDigit}</td>
-                                    <td>{step.newCarry}</td>
-                                </tr>
+        const { paddedTop, paddedBottom, paddedRes, carryRow, borrowRow } = digits;
+        const opSymbol = getOperatorSymbol();
+
+        return (
+            <div className="calculation-visual">
+                <div className="visual-work">
+                    {(operation === 'addition' || operation === 'subtraction') && (
+                        <div className={`digit-row ${operation === 'addition' ? 'carry-row' : 'borrow-row'}`}>
+                            <div className="operator-space" />
+                            {carryRow.map((c, idx) => (
+                                <div key={`c-${idx}`} className="digit-cell">
+                                    {c && operation === 'addition' && (
+                                        <span className="carry-indicator">1</span>
+                                    )}
+                                    {c && operation === 'subtraction' && (
+                                        <span className="borrow-indicator">1</span>
+                                    )}
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                    )}
+
+                    <div className="digit-row">
+                        <div className="operator-space" />
+                        {Array.from(paddedTop).map((ch, idx) => (
+                            <div key={`t-${idx}`} className="digit-cell">
+                                {ch.trim() || ''}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="digit-row">
+                        <div className="operator-space">{opSymbol}</div>
+                        {Array.from(paddedBottom).map((ch, idx) => (
+                            <div key={`b-${idx}`} className="digit-cell">
+                                {ch.trim() || ''}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="separator-line" />
+
+                    <div className="digit-row result-row">
+                        <div className="operator-space">=</div>
+                        {Array.from(paddedRes).map((ch, idx) => (
+                            <div key={`r-${idx}`} className="digit-cell">
+                                <span className="result-digit">{ch.trim() || ''}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            );
-        }
-
-        if (operation === 'subtraction') {
-            const note = result.isNegative ? <p className="hint">Note: Result is negative → visualized as {input2} − {input1} for positive magnitude.</p> : null;
-            return (
-                <div className="visualization">
-                    <h3>Step-by-Step Subtraction</h3>
-                    {note}
-                    <table className="steps-table">
-                        <thead>
-                            <tr>
-                                <th>Column (from right)</th>
-                                <th>Digit (minuend)</th>
-                                <th>Digit (subtrahend)</th>
-                                <th>Borrow In</th>
-                                <th>Diff</th>
-                                <th>Write</th>
-                                <th>Borrow Out</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {steps.map((step, i) => (
-                                <tr key={i}>
-                                    <td>{step.position + 1}</td>
-                                    <td>{step.digit1}</td>
-                                    <td>{step.digit2}</td>
-                                    <td>{step.borrow}</td>
-                                    <td>{step.diff}</td>
-                                    <td>{step.resultDigit}</td>
-                                    <td>{step.newBorrow}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            );
-        }
-
-        if (operation === 'multiplication' && result.partialProducts) {
-            const maxLength = Math.max(result.result.length, ...result.partialProducts.map(p => p.length));
-            const paddedNum1 = input1.toUpperCase().padStart(maxLength, ' ');
-            const paddedNum2 = input2.toUpperCase().padStart(maxLength, ' ');
-            const partialLines = result.partialProducts.map(p => p.padStart(maxLength, ' '));
-            const paddedResult = result.result.padStart(maxLength, ' ');
-
-            const lines = [
-                `    ${paddedNum1}`,
-                `  × ${paddedNum2}`,
-                `  ${'-'.repeat(maxLength)}`,
-                ...partialLines.map(l => `   ${l}`),
-                `  ${'-'.repeat(maxLength)}`,
-                `    ${paddedResult}`
-            ];
-
-            return (
-                <div className="visualization">
-                    <h3>Long Multiplication</h3>
-                    <pre className="long-operation">{lines.join('\n')}</pre>
-                </div>
-            );
-        }
-
-        return null;
+            </div>
+        );
     };
 
     return (
         <div className="calculator-container">
-            <style>{`
-                .binary-highlight { font-family: 'Courier New', monospace; background-color: #e3f2fd; padding: 4px 8px; border-radius: 4px; font-weight: 600; color: #1565c0; }
-                .hint { color: #7b1fa2; font-style: italic; font-size: 0.9em; margin-top: 8px; }
-                .steps-table { border-collapse: collapse; margin: 20px 0; width: 100%; }
-                .steps-table th, .steps-table td { border: 1px solid #bbb; padding: 8px 12px; text-align: center; background: #f9f9f9; }
-                .steps-table th { background: #e0e0e0; }
-                .long-operation { font-family: 'Courier New', monospace; background: #f0f0f0; padding: 15px; border-radius: 8px; overflow-x: auto; }
-                .result-display { margin: 20px 0; font-size: 1.1em; }
-                .visualization { margin: 30px 0; padding: 20px; background: #fafafa; border-radius: 8px; border: 1px solid #ddd; }
-                .fade-in { animation: fadeIn 0.5s; }
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            `}</style>
-
             <div className="grid-background"></div>
 
             <header className="header">

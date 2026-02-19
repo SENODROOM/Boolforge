@@ -14,6 +14,8 @@ export default function BinaryRepresentation() {
     const [tcBitsInput, setTcBitsInput] = useState(8);
     const [tcRange, setTcRange] = useState({ min: 0, max: 0, distinct: 0 });
     const [showTcChart, setShowTcChart] = useState(false);
+    const [unsignedBits, setUnsignedBits] = useState(8);
+    const [unsignedRange, setUnsignedRange] = useState({ min: 0, max: 255, distinct: 256 });
 
     useEffect(() => {
         const n = parseInt(smBitsInput, 10);
@@ -34,6 +36,16 @@ export default function BinaryRepresentation() {
             setTcRange(null);
         }
     }, [tcBitsInput]);
+
+    useEffect(() => {
+        const n = parseInt(unsignedBits, 10);
+        if (!isNaN(n) && n > 0 && n <= 53) {
+            const max = Math.pow(2, n) - 1;
+            setUnsignedRange({ min: 0, max, distinct: Math.pow(2, n) });
+        } else {
+            setUnsignedRange(null);
+        }
+    }, [unsignedBits]);
 
     useEffect(() => {
         if (!smInput || smInput === '-' || smInput === '+') {
@@ -256,6 +268,59 @@ export default function BinaryRepresentation() {
                             )}
                         </div>
                     )}
+                </section>
+
+                <section className="binary-card">
+                    <h2 className="binary-section-title binary-title-primary">
+                        <span className="binary-dot binary-dot-primary"></span>
+                        Unsigned Range (0 to 2ⁿ − 1)
+                    </h2>
+
+                    <div className="binary-info-box binary-info-primary">
+                        <h3 className="binary-info-heading">Data range of n bits</h3>
+                        <p className="binary-text">
+                            When all bits are used for <span className="binary-highlight-primary">magnitude only</span>,
+                            the smallest value is <strong>0</strong> (all bits 0) and the largest value is when all bits are 1.
+                            This gives the classic range:
+                            <br />
+                            <span className="binary-highlight-primary">0 to 2ⁿ − 1</span>
+                        </p>
+
+                        <div className="binary-controls-grid">
+                            <div className="binary-input-group">
+                                <label className="binary-label">Number of Bits (n)</label>
+                                <input
+                                    type="number"
+                                    className="binary-input-field binary-input-primary"
+                                    value={unsignedBits}
+                                    onChange={(e) => setUnsignedBits(e.target.value)}
+                                    min="1"
+                                    max="53"
+                                />
+                            </div>
+                            <div className="binary-input-group">
+                                {unsignedRange && (
+                                    <div className="binary-text">
+                                        <p>
+                                            <span className="binary-highlight-primary">
+                                                Range: {unsignedRange.min.toLocaleString()} to {unsignedRange.max.toLocaleString()}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            <strong>Distinct values:</strong> {unsignedRange.distinct.toLocaleString()} (2ⁿ)
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="binary-example-box">
+                            <h4 className="binary-reference-title">Example: n = 4 bits</h4>
+                            <p className="binary-text">
+                                4 bits give 2⁴ = 16 distinct patterns, from 0000₂ = 0₁₀ up to 1111₂ = 15₁₀.
+                            </p>
+                        </div>
+                    </div>
                 </section>
 
                 <section className="binary-card">
