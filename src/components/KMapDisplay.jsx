@@ -7,7 +7,8 @@ export const KMapDisplay = ({
     variables,
     getColumnLabels,
     getRowLabels,
-    showGroupingGuide
+    showGroupingGuide,
+    optimizationType = 'SOP'
 }) => {
     // const getCellKey = (rowIdx, colIdx) => `${rowIdx}-${colIdx}`;
 
@@ -21,12 +22,28 @@ export const KMapDisplay = ({
     const renderCell = (cell, rowIdx, colIdx) => {
         const cellGroups = getCellGroups(rowIdx, colIdx);
         const isGrouped = cellGroups.length > 0;
+        
+        // Determine cell class based on value and optimization type
+        let cellClass = 'kmap-cell';
+        const isPOS = optimizationType === 'POS';
+        if (cell === 1 && !isPOS) {
+            cellClass += ' kmap-cell-filled';
+        } else if (cell === 0 && isPOS) {
+            cellClass += ' kmap-cell-filled kmap-cell-pos';
+        } else if (cell === 'X') {
+            cellClass += ' kmap-cell-dontcare';
+        } else {
+            cellClass += ' kmap-cell-empty';
+        }
+        
+        if (isGrouped) {
+            cellClass += ' kmap-cell-grouped';
+        }
 
         return (
             <td
                 key={colIdx}
-                className={`kmap-cell ${cell === 1 ? 'kmap-cell-filled' : 'kmap-cell-empty'
-                    } ${isGrouped ? 'kmap-cell-grouped' : ''}`}
+                className={cellClass}
                 style={isGrouped ? {
                     backgroundColor: cellGroups[0].color.bg,
                     borderColor: cellGroups[0].color.border,
@@ -51,7 +68,9 @@ export const KMapDisplay = ({
 
     return (
         <div className="kmap-card">
-            <h2 className="kmap-section-title">Karnaugh Map</h2>
+            <h2 className="kmap-section-title">
+                Karnaugh Map {optimizationType === 'POS' ? '(Product of Sums)' : '(Sum of Products)'}
+            </h2>
 
             <div className="kmap-wrapper">
                 <div className="kmap-grid-container">
@@ -85,7 +104,9 @@ export const KMapDisplay = ({
 
                 {showGroupingGuide && groups.length > 0 && (
                     <div className="kmap-groups-legend">
-                        <h3 className="kmap-groups-legend-title">Detected Groups</h3>
+                        <h3 className="kmap-groups-legend-title">
+                            Detected Groups ({optimizationType === 'POS' ? 'Maxterms' : 'Minterms'})
+                        </h3>
                         <div className="kmap-groups-legend-list">
                             {groups.map((group, idx) => (
                                 <div key={group.id} className="kmap-group-legend-item">
@@ -93,13 +114,33 @@ export const KMapDisplay = ({
                                         className="kmap-group-legend-color"
                                         style={{ backgroundColor: group.color.border }}
                                     />
-                                    <span>Group {idx + 1}: {group.size} cells (minterms: {group.minterms.join(', ')})</span>
+                                    <span>
+                                        Group {idx + 1}: {group.size} cells 
+                                        ({optimizationType === 'POS' ? 'maxterms' : 'minterms'}: {group.minterms.join(', ')})
+                                    </span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
             </div>
-        </div>
+        <style jsx>{`
+                .kmap-cell-dontcare {
+                    background: rgba(251, 191, 36, 0.2) !important;
+                    color: #fbbf24 !important;
+                    border: 1px solid rgba(251, 191, 36, 0.5) !important;
+                }
+                
+                .kmap-cell-dontcare.kmap-cell-grouped {
+                    background: rgba(251, 191, 36, 0.4) !important;
+                    border-color: rgba(251, 191, 36, 0.8) !important;
+                }
+                
+                .kmap-cell-pos {
+                    background: rgba(99, 102, 241, 0.25) !important;
+                    border-color: rgba(99, 102, 241, 0.7) !important;
+                }
+            `}</style>
+    </div>
     );
 };

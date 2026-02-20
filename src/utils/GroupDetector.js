@@ -1,4 +1,4 @@
-export const detectGroups = (grid, numVariables, mintermArray) => {
+export const detectGroups = (grid, numVariables, mintermArray, optimizationType = 'SOP') => {
     const groups = [];
     const rows = grid.length;
     const cols = grid[0].length;
@@ -18,10 +18,17 @@ export const detectGroups = (grid, numVariables, mintermArray) => {
         }
     };
 
-    // Helper to check if a cell contains a 1
-    const isOne = (row, col) => {
+    // Helper to check if a cell contains the target value (1 for SOP, 0 for POS)
+    const isTargetValue = (row, col) => {
         if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
-        return grid[row][col] === 1;
+        const cellValue = grid[row][col];
+        // For POS, we group 0s (excluding don't cares)
+        // For SOP, we group 1s (including don't cares as 1s)
+        if (optimizationType === 'POS') {
+            return cellValue === 0;
+        } else {
+            return cellValue === 1 || cellValue === 'X';
+        }
     };
 
     // Try to find groups of different sizes
@@ -47,7 +54,7 @@ export const detectGroups = (grid, numVariables, mintermArray) => {
             for (let startCol = 0; startCol < cols; startCol++) {
                 const cells = [];
                 const minterms = [];
-                let allOnes = true;
+                let allTargetValues = true;
                 let hasUncovered = false;
 
                 for (let r = 0; r < gRows; r++) {
@@ -55,8 +62,10 @@ export const detectGroups = (grid, numVariables, mintermArray) => {
                         const row = (startRow + r) % rows;
                         const col = (startCol + c) % cols;
 
-                        if (!isOne(row, col)) {
-                            allOnes = false;
+                        if (isTargetValue(row, col)) {
+                            allTargetValues = true;
+                        } else {
+                            allTargetValues = false;
                             break;
                         }
 
@@ -68,11 +77,11 @@ export const detectGroups = (grid, numVariables, mintermArray) => {
                             hasUncovered = true;
                         }
                     }
-                    if (!allOnes) break;
+                    if (!allTargetValues) break;
                 }
 
                 // Only add group if it's valid and covers new minterms
-                if (allOnes && hasUncovered && minterms.length === size) {
+                if (allTargetValues && hasUncovered && minterms.length === size) {
                     const groupId = `group-${groups.length}`;
                     groups.push({
                         id: groupId,

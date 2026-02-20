@@ -11,6 +11,8 @@ const KMapGenerator = () => {
     const [numVariables, setNumVariables] = useState(3);
     const [variables, setVariables] = useState(['A', 'B', 'C']);
     const [minterms, setMinterms] = useState('');
+    const [dontCares, setDontCares] = useState('');
+    const [optimizationType, setOptimizationType] = useState('SOP');
     const [showSolution, setShowSolution] = useState(false);
     const [showGroupingGuide, setShowGroupingGuide] = useState(false);
     const [showCircuitModal, setShowCircuitModal] = useState(false);
@@ -21,7 +23,7 @@ const KMapGenerator = () => {
         groups,
         getColumnLabels,
         getRowLabels
-    } = useKMapLogic(numVariables, variables, minterms);
+    } = useKMapLogic(numVariables, variables, minterms, dontCares, optimizationType);
 
     const handleVariablesChange = (value) => {
         const num = parseInt(value);
@@ -34,16 +36,20 @@ const KMapGenerator = () => {
     const handleExample = () => {
         if (numVariables === 3) {
             setMinterms('0,1,2,5,6,7');
+            setDontCares('3,4');
         } else if (numVariables === 4) {
             setMinterms('0,1,2,5,6,7,8,9,10,14');
+            setDontCares('3,11,12,13,15');
         } else {
             setMinterms('0,2,3');
+            setDontCares('1');
         }
         setShowSolution(false);
     };
 
     const handleReset = () => {
         setMinterms('');
+        setDontCares('');
         setShowSolution(false);
         setShowGroupingGuide(false);
     };
@@ -60,9 +66,13 @@ const KMapGenerator = () => {
                     numVariables={numVariables}
                     variables={variables}
                     minterms={minterms}
+                    dontCares={dontCares}
+                    optimizationType={optimizationType}
                     onVariablesChange={handleVariablesChange}
                     onVariablesUpdate={setVariables}
                     onMintermsChange={setMinterms}
+                    onDontCaresChange={setDontCares}
+                    onOptimizationTypeChange={setOptimizationType}
                     onGenerate={() => setShowSolution(true)}
                     onExample={handleExample}
                     onReset={handleReset}
@@ -78,6 +88,7 @@ const KMapGenerator = () => {
                             getColumnLabels={getColumnLabels}
                             getRowLabels={getRowLabels}
                             showGroupingGuide={showGroupingGuide}
+                            optimizationType={optimizationType}
                         />
 
                         <SimplifiedExpression
@@ -110,6 +121,7 @@ const KMapGenerator = () => {
                                 grid={grid}
                                 getColumnLabels={getColumnLabels}
                                 getRowLabels={getRowLabels}
+                                optimizationType={optimizationType}
                             />
                         )}
 
@@ -117,6 +129,8 @@ const KMapGenerator = () => {
                             numVariables={numVariables}
                             variables={variables}
                             minterms={minterms}
+                            dontCares={dontCares}
+                            optimizationType={optimizationType}
                         />
                     </>
                 )}

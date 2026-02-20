@@ -3928,6 +3928,10 @@ a:focus-visible {
     align-items: flex-start;
 }
 
+.explanation ul{
+    margin: 0 40px;
+}
+
 .info-list li::before {
     content: '▸';
     color: var(--color-accent-amber);
@@ -4436,11 +4440,12 @@ select:focus-visible {
 }
 
 .binary-table-container {
-    margin-top: 15px;
+    margin: 15px 0;
     max-height: 500px;
     overflow-y: auto;
     border: 1px solid var(--bg-medium);
     border-radius: 8px;
+    margin-bottom: 55px;
 }
 
 .binary-table-header {

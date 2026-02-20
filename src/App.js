@@ -30,6 +30,9 @@ import StandardForms from './pages/StandardForms';
 import MintermsPage from './pages/MintermsPage';
 import MaxtermsPage from './pages/MaxtermsPage';
 import MintermsMaxtermsRelation from './pages/MintermsMaxtermsRelation';
+import CircuitCost from './pages/CircuitCost';
+import UniversalGates from './pages/UniversalGates';
+import OddFunction from './pages/OddFunction';
 
 function App() {
   return (
@@ -62,6 +65,9 @@ function App() {
           <Route path="/minterms" element={<MintermsPage />} />
           <Route path="/maxterms" element={<MaxtermsPage />} />
           <Route path="/minterms-maxterms" element={<MintermsMaxtermsRelation />} />
+          <Route path="/circuit-cost" element={<CircuitCost />} />
+          <Route path="/universal-gates" element={<UniversalGates />} />
+          <Route path="/odd-function" element={<OddFunction />} />
         </Routes>
       </BrowserRouter>
     </>

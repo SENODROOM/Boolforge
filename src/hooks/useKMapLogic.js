@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { QuineMcCluskey } from '../utils/QuineMcCluskey';
 import { detectGroups } from '../utils/GroupDetector';
 
-export const useKMapLogic = (numVariables, variables, minterms) => {
+export const useKMapLogic = (numVariables, variables, minterms, dontCares = '', optimizationType = 'SOP') => {
     const mintermArray = useMemo(() => {
         return minterms
             .split(',')
@@ -12,6 +12,15 @@ export const useKMapLogic = (numVariables, variables, minterms) => {
             .filter(m => !isNaN(m) && m >= 0 && m < Math.pow(2, numVariables));
     }, [minterms, numVariables]);
 
+    const dontCareArray = useMemo(() => {
+        return dontCares
+            .split(',')
+            .map(m => m.trim())
+            .filter(m => m !== '')
+            .map(m => parseInt(m))
+            .filter(m => !isNaN(m) && m >= 0 && m < Math.pow(2, numVariables));
+    }, [dontCares, numVariables]);
+
     const grid = useMemo(() => {
         const rows = numVariables <= 2 ? 2 : (numVariables === 3 ? 2 : 4);
         const cols = numVariables <= 2 ? 2 : 4;
@@ -20,6 +29,7 @@ export const useKMapLogic = (numVariables, variables, minterms) => {
         // const grayCode2 = [0, 1]; // For 2 variables: 0, 1
         const grayCode4 = [0, 1, 3, 2]; // For 3-4 variables: 00, 01, 11, 10
         const mintermSet = new Set(mintermArray);
+        const dontCareSet = new Set(dontCareArray);
 
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
@@ -40,25 +50,36 @@ export const useKMapLogic = (numVariables, variables, minterms) => {
 
                 if (mintermSet.has(minterm)) {
                     gridArray[i][j] = 1;
+                } else if (dontCareSet.has(minterm)) {
+                    gridArray[i][j] = 'X';
                 }
             }
         }
 
         return gridArray;
-    }, [mintermArray, numVariables]);
+    }, [mintermArray, dontCareArray, numVariables]);
 
     const expression = useMemo(() => {
         if (mintermArray.length === 0) return 'F = 0';
         if (mintermArray.length === Math.pow(2, numVariables)) return 'F = 1';
 
         const qm = new QuineMcCluskey(numVariables, variables);
-        return qm.simplify(mintermArray);
-    }, [mintermArray, numVariables, variables]);
+        
+        if (optimizationType === 'POS') {
+            // For POS, work with maxterms (complement of minterms)
+            const allTerms = Array.from({length: Math.pow(2, numVariables)}, (_, i) => i);
+            const maxterms = allTerms.filter(term => !mintermArray.includes(term) && !dontCareArray.includes(term));
+            return qm.simplifyPOS(maxterms, dontCareArray);
+        } else {
+            // SOP optimization with don't cares
+            return qm.simplify(mintermArray, dontCareArray);
+        }
+    }, [mintermArray, dontCareArray, numVariables, variables, optimizationType]);
 
     const groups = useMemo(() => {
-        if (mintermArray.length === 0) return [];
-        return detectGroups(grid, numVariables, mintermArray);
-    }, [grid, numVariables, mintermArray]);
+        if (mintermArray.length === 0 && optimizationType !== 'POS') return [];
+        return detectGroups(grid, numVariables, mintermArray, optimizationType);
+    }, [grid, numVariables, mintermArray, optimizationType]);
 
     const getColumnLabels = () => {
         if (numVariables === 2) return ['0', '1'];
@@ -100,6 +121,8 @@ export const useKMapLogic = (numVariables, variables, minterms) => {
         getColumnLabels,
         getRowLabels,
         getMintermPosition,
-        simplifyBoolean: () => expression
+        simplifyBoolean: () => expression,
+        dontCareArray,
+        optimizationType
     };
 };

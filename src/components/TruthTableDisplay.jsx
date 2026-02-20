@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const TruthTableDisplay = ({ numVariables, variables, minterms }) => {
+export const TruthTableDisplay = ({ numVariables, variables, minterms, dontCares, optimizationType = 'SOP' }) => {
     const mintermSet = new Set(
         minterms
             .split(',')
@@ -8,6 +8,16 @@ export const TruthTableDisplay = ({ numVariables, variables, minterms }) => {
             .filter(m => m !== '')
             .map(m => parseInt(m))
     );
+    
+    const dontCareSet = new Set(
+        dontCares
+            .split(',')
+            .map(m => m.trim())
+            .filter(m => m !== '')
+            .map(m => parseInt(m))
+    );
+
+    const isPOS = optimizationType === 'POS';
 
     return (
         <div className="kmap-card">
@@ -25,7 +35,17 @@ export const TruthTableDisplay = ({ numVariables, variables, minterms }) => {
                 <tbody>
                     {Array.from({ length: Math.pow(2, numVariables) }, (_, i) => {
                         const binary = i.toString(2).padStart(numVariables, '0');
-                        const output = mintermSet.has(i) ? 1 : 0;
+                        let output;
+                        
+                        if (dontCareSet.has(i)) {
+                            output = 'X';
+                        } else if (isPOS) {
+                            // For POS: output is 1 for maxterms (where original function is 0)
+                            output = mintermSet.has(i) ? 0 : 1;
+                        } else {
+                            // For SOP: output is 1 for minterms
+                            output = mintermSet.has(i) ? 1 : 0;
+                        }
 
                         return (
                             <tr key={i}>
@@ -33,7 +53,11 @@ export const TruthTableDisplay = ({ numVariables, variables, minterms }) => {
                                 {binary.split('').map((bit, idx) => (
                                     <td key={idx}>{bit}</td>
                                 ))}
-                                <td className={output === 1 ? 'output-1' : 'output-0'}>
+                                <td className={`output-cell ${
+                                    output === 1 ? 'output-1' : 
+                                    output === 0 ? 'output-0' : 
+                                    'output-x'
+                                }`}>
                                     {output}
                                 </td>
                             </tr>

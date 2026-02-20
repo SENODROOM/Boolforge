@@ -93,14 +93,31 @@ export class QuineMcCluskey {
         return result || '1';
     }
 
-    simplify(mintermArray) {
+    binaryToAlgebraicPOS(binary) {
+        let result = '';
+        for (let i = 0; i < binary.length; i++) {
+            if (binary[i] === '0') {
+                result += this.variables[i];
+            } else if (binary[i] === '1') {
+                result += this.variables[i] + "'";
+            }
+        }
+        return result || '0';
+    }
+
+    simplify(mintermArray, dontCareArray = []) {
         if (mintermArray.length === 0) return 'F = 0';
         if (mintermArray.length === Math.pow(2, this.numVariables)) return 'F = 1';
 
-        let currentGroup = mintermArray.map(m => ({
+        // Combine minterms and don't cares for grouping, but only use minterms for final selection
+        const allTerms = [...mintermArray, ...dontCareArray];
+        const mintermSet = new Set(mintermArray);
+
+        let currentGroup = allTerms.map(m => ({
             binary: m.toString(2).padStart(this.numVariables, '0'),
             minterms: [m],
-            used: false
+            used: false,
+            isDontCare: dontCareArray.includes(m)
         }));
 
         const allPrimeImplicants = [];
@@ -132,6 +149,7 @@ export class QuineMcCluskey {
 
                             const newBinary = this.combinTerms(term1.binary, term2.binary, pos);
                             const newMinterms = [...new Set([...term1.minterms, ...term2.minterms])].sort((a, b) => a - b);
+                            const isDontCare = newMinterms.every(m => dontCareArray.includes(m));
 
                             const exists = nextGroup.some(t =>
                                 t.binary === newBinary &&
@@ -142,7 +160,8 @@ export class QuineMcCluskey {
                                 nextGroup.push({
                                     binary: newBinary,
                                     minterms: newMinterms,
-                                    used: false
+                                    used: false,
+                                    isDontCare
                                 });
                             }
                         }
@@ -166,11 +185,16 @@ export class QuineMcCluskey {
             currentGroup = nextGroup;
         }
 
+        // Filter out prime implicants that only cover don't cares
+        const usefulPIs = allPrimeImplicants.filter(pi => 
+            pi.minterms.some(m => mintermSet.has(m))
+        );
+
         // Find essential prime implicants
         const coverage = new Map();
         mintermArray.forEach(m => coverage.set(m, []));
 
-        allPrimeImplicants.forEach((pi, idx) => {
+        usefulPIs.forEach((pi, idx) => {
             pi.minterms.forEach(m => {
                 if (coverage.has(m)) {
                     coverage.get(m).push(idx);
@@ -185,7 +209,7 @@ export class QuineMcCluskey {
             }
         });
 
-        const selected = Array.from(essentialPIs).map(idx => allPrimeImplicants[idx]);
+        const selected = Array.from(essentialPIs).map(idx => usefulPIs[idx]);
         const coveredMinterms = new Set();
         selected.forEach(pi => {
             pi.minterms.forEach(m => coveredMinterms.add(m));
@@ -194,7 +218,7 @@ export class QuineMcCluskey {
         // Cover remaining minterms
         const remaining = mintermArray.filter(m => !coveredMinterms.has(m));
         if (remaining.length > 0) {
-            const unusedPIs = allPrimeImplicants.filter((_, idx) => !essentialPIs.has(idx));
+            const unusedPIs = usefulPIs.filter((_, idx) => !essentialPIs.has(idx));
             unusedPIs.sort((a, b) => b.minterms.length - a.minterms.length);
 
             for (const pi of unusedPIs) {
@@ -213,5 +237,139 @@ export class QuineMcCluskey {
         const simplifiedTerms = this.applyAbsorption(algebraicTerms);
 
         return 'F = ' + simplifiedTerms.join(' + ');
+    }
+
+    simplifyPOS(maxterms, dontCareArray = []) {
+        if (maxterms.length === 0) return 'F = 1';
+        if (maxterms.length === Math.pow(2, this.numVariables)) return 'F = 0';
+
+        // For POS, we work with maxterms and don't cares
+        const allTerms = [...maxterms, ...dontCareArray];
+        const maxtermSet = new Set(maxterms);
+
+        let currentGroup = allTerms.map(m => ({
+            binary: m.toString(2).padStart(this.numVariables, '0'),
+            maxterms: [m],
+            used: false,
+            isDontCare: dontCareArray.includes(m)
+        }));
+
+        const allPrimeImplicants = [];
+
+        while (true) {
+            const groups = {};
+
+            currentGroup.forEach(term => {
+                const ones = this.countOnes(term.binary);
+                if (!groups[ones]) groups[ones] = [];
+                groups[ones].push(term);
+            });
+
+            const nextGroup = [];
+            const groupKeys = Object.keys(groups).map(Number).sort((a, b) => a - b);
+
+            for (let i = 0; i < groupKeys.length - 1; i++) {
+                const currentKey = groupKeys[i];
+                const nextKey = groupKeys[i + 1];
+
+                if (nextKey - currentKey !== 1) continue;
+
+                groups[currentKey].forEach(term1 => {
+                    groups[nextKey].forEach(term2 => {
+                        const pos = this.canCombine(term1.binary, term2.binary);
+                        if (pos !== -1) {
+                            term1.used = true;
+                            term2.used = true;
+
+                            const newBinary = this.combinTerms(term1.binary, term2.binary, pos);
+                            const newMaxterms = [...new Set([...term1.maxterms, ...term2.maxterms])].sort((a, b) => a - b);
+                            const isDontCare = newMaxterms.every(m => dontCareArray.includes(m));
+
+                            const exists = nextGroup.some(t =>
+                                t.binary === newBinary &&
+                                JSON.stringify(t.maxterms) === JSON.stringify(newMaxterms)
+                            );
+
+                            if (!exists) {
+                                nextGroup.push({
+                                    binary: newBinary,
+                                    maxterms: newMaxterms,
+                                    used: false,
+                                    isDontCare
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+
+            currentGroup.forEach(term => {
+                if (!term.used) {
+                    const exists = allPrimeImplicants.some(pi =>
+                        pi.binary === term.binary &&
+                        JSON.stringify(pi.maxterms) === JSON.stringify(term.maxterms)
+                    );
+                    if (!exists) {
+                        allPrimeImplicants.push(term);
+                    }
+                }
+            });
+
+            if (nextGroup.length === 0) break;
+            currentGroup = nextGroup;
+        }
+
+        // Filter out prime implicants that only cover don't cares
+        const usefulPIs = allPrimeImplicants.filter(pi => 
+            pi.maxterms.some(m => maxtermSet.has(m))
+        );
+
+        // Find essential prime implicants
+        const coverage = new Map();
+        maxterms.forEach(m => coverage.set(m, []));
+
+        usefulPIs.forEach((pi, idx) => {
+            pi.maxterms.forEach(m => {
+                if (coverage.has(m)) {
+                    coverage.get(m).push(idx);
+                }
+            });
+        });
+
+        const essentialPIs = new Set();
+        coverage.forEach((pis, maxterm) => {
+            if (pis.length === 1) {
+                essentialPIs.add(pis[0]);
+            }
+        });
+
+        const selected = Array.from(essentialPIs).map(idx => usefulPIs[idx]);
+        const coveredMaxterms = new Set();
+        selected.forEach(pi => {
+            pi.maxterms.forEach(m => coveredMaxterms.add(m));
+        });
+
+        // Cover remaining maxterms
+        const remaining = maxterms.filter(m => !coveredMaxterms.has(m));
+        if (remaining.length > 0) {
+            const unusedPIs = usefulPIs.filter((_, idx) => !essentialPIs.has(idx));
+            unusedPIs.sort((a, b) => b.maxterms.length - a.maxterms.length);
+
+            for (const pi of unusedPIs) {
+                if (pi.maxterms.some(m => remaining.includes(m))) {
+                    selected.push(pi);
+                    pi.maxterms.forEach(m => {
+                        const idx = remaining.indexOf(m);
+                        if (idx > -1) remaining.splice(idx, 1);
+                    });
+                    if (remaining.length === 0) break;
+                }
+            }
+        }
+
+        const algebraicTerms = selected.map(pi => this.binaryToAlgebraicPOS(pi.binary));
+        const simplifiedTerms = this.applyAbsorption(algebraicTerms);
+
+        return 'F = ' + simplifiedTerms.join(' · ');
     }
 }

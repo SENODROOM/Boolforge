@@ -105,8 +105,22 @@ const BooleanIdentities = () => {
 
       <ExplanationBlock title="What are Boolean Identities?">
         <p className="explanation-intro">
-          Identities are algebraic rules that let you simplify expressions without changing their meaning. They are the foundation for optimizing logic and minimizing circuits.
+          Boolean identities are fundamental algebraic rules that allow you to simplify and manipulate Boolean expressions without changing their logical meaning. These identities are the foundation for optimizing digital circuits, reducing hardware complexity, and improving computational efficiency.
         </p>
+        <div className="info-card">
+          <h4>Why Identities Matter:</h4>
+          <ul>
+            <li><strong>Circuit Optimization:</strong> Reduce the number of gates needed</li>
+            <li><strong>Power Efficiency:</strong> Fewer gates mean less power consumption</li>
+            <li><strong>Speed Improvement:</strong> Simplified logic reduces propagation delay</li>
+            <li><strong>Cost Reduction:</strong> Less silicon area required for implementation</li>
+            <li><strong>Reliability:</strong> Fewer components mean fewer failure points</li>
+          </ul>
+        </div>
+        <div className="example-box">
+          <h4>Real-World Impact:</h4>
+          <p>Modern processors contain billions of logic gates. Even a 1% reduction in gate count through Boolean optimization can save millions of transistors, reduce power consumption by watts, and improve clock speeds by megahertz.</p>
+        </div>
       </ExplanationBlock>
 
       <div className="identity-grid">
@@ -130,7 +144,14 @@ const BooleanIdentities = () => {
               </table>
             </div>
             <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
-              <div className="var-list">Example: {id.original} → {id.simplified}</div>
+              <div className="example-box">
+                <p><strong>Example Application:</strong></p>
+                <p>Using {id.name} identity to simplify expressions:</p>
+                <ul>
+                  <li>For OR: {id.add.replace('=', '→')}</li>
+                  <li>For AND: {id.mul.replace('=', '→')}</li>
+                </ul>
+              </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   className="kmap-btn kmap-btn-primary"

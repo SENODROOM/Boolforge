@@ -52,16 +52,38 @@ const Home = () => {
         </section>
 
         <section className="home-grid">
-          <article className="home-card">
-            <h3>Boolean Algebra</h3>
+          {/* Core Tools - Most Important */}
+          <article className="home-card featured-card">
+            <h3>🔧 Circuit Forge</h3>
             <p>
-              Foundations of digital logic: variables, identities, duality, SOP/POS, minterms and maxterms.
+              Drag‑and‑drop logic gates, connect wires, and instantly see truth tables and outputs.
+            </p>
+            <Link to="/boolforge" className="home-card-link primary-link">
+              Open Circuit Forge →
+            </Link>
+          </article>
+
+          <article className="home-card featured-card">
+            <h3>🗺️ K‑Map Generator</h3>
+            <p>
+              Generate and simplify boolean expressions visually using interactive Karnaugh maps with SOP/POS optimization.
+            </p>
+            <Link to="/kmapgenerator" className="home-card-link primary-link">
+              Go to K‑Maps →
+            </Link>
+          </article>
+
+          {/* Boolean Algebra Section */}
+          <article className="home-card">
+            <h3>📐 Boolean Algebra</h3>
+            <p>
+              Master the foundations of digital logic with interactive tools for identities, laws, and expressions.
             </p>
             <div className="home-card-links">
               <Link to="/boolean-algebra" className="home-card-link">Overview</Link>
               <Link to="/boolean-identities" className="home-card-link">Identities</Link>
-              <Link to="/duality-principle" className="home-card-link">Duality</Link>
               <Link to="/boolean-laws" className="home-card-link">Laws</Link>
+              <Link to="/duality-principle" className="home-card-link">Duality</Link>
               <Link to="/consensus-theorem" className="home-card-link">Consensus</Link>
               <Link to="/complement" className="home-card-link">Complement</Link>
               <Link to="/standard-forms" className="home-card-link">SOP & POS</Link>
@@ -71,79 +93,35 @@ const Home = () => {
             </div>
           </article>
 
+          {/* Advanced Logic Section */}
           <article className="home-card">
-            <h3>Circuit Forge</h3>
+            <h3>⚡ Advanced Logic</h3>
             <p>
-              Drag‑and‑drop logic gates, connect wires, and instantly see truth tables and outputs.
-            </p>
-            <Link to="/boolforge" className="home-card-link">
-              Open Circuit Forge →
-            </Link>
-          </article>
-
-          <article className="home-card">
-            <h3>K‑Map Generator</h3>
-            <p>
-              Generate and simplify boolean expressions visually using interactive Karnaugh maps.
-            </p>
-            <Link to="/kmapgenerator" className="home-card-link">
-              Go to K‑Maps →
-            </Link>
-          </article>
-
-          <article className="home-card">
-            <h3>Number System Tools</h3>
-            <p>
-              Convert between bases and run detailed step‑by‑step operations across number systems.
+              Explore circuit optimization, universal gates, and special functions for deeper understanding.
             </p>
             <div className="home-card-links">
-              <Link to="/numberconversation" className="home-card-link">
-                Base Converter
-              </Link>
+              <Link to="/circuit-cost" className="home-card-link">Circuit Cost</Link>
+              <Link to="/universal-gates" className="home-card-link">Universal Gates</Link>
+              <Link to="/odd-function" className="home-card-link">Odd Function</Link>
+              <Link to="/gates" className="home-card-link">Gate Explanations</Link>
+            </div>
+          </article>
+
+          {/* Number Systems Section */}
+          <article className="home-card">
+            <h3>🔢 Number Systems</h3>
+            <p>
+              Convert between bases and run detailed step‑by‑step operations across different number systems.
+            </p>
+            <div className="home-card-links">
               <Link to="/numbersystemcalculator" className="home-card-link">
                 System Calculator
               </Link>
-            </div>
-          </article>
-
-          <article className="home-card">
-            <h3>Binary & Parity</h3>
-            <p>
-              Visualize binary representations and explore parity bits for error detection.
-            </p>
-            <div className="home-card-links">
+              <Link to="/numberconversation" className="home-card-link">
+                Base Converter
+              </Link>
               <Link to="/binaryrepresentation" className="home-card-link">
                 Binary Visualizer
-              </Link>
-              <Link to="/paritybitcalculator" className="home-card-link">
-                Parity Calculator
-              </Link>
-            </div>
-          </article>
-
-          <article className="home-card">
-            <h3>Bit Converter & Extension</h3>
-            <p>
-              Inspect, flip, convert and extend bit patterns to different word sizes.
-            </p>
-            <div className="home-card-links">
-              <Link to="/bitconvertor" className="home-card-link">
-                Bit Converter
-              </Link>
-              <Link to="/bit-extension" className="home-card-link">
-                Bit Extension
-              </Link>
-            </div>
-          </article>
-
-          <article className="home-card">
-            <h3>Number Precision & Codes</h3>
-            <p>
-              Explore significant digits, BCD, ASCII and how data is encoded numerically.
-            </p>
-            <div className="home-card-links">
-              <Link to="/significant-digits" className="home-card-link">
-                Significant Digits
               </Link>
               <Link to="/bcd-notation" className="home-card-link">
                 BCD Notation
@@ -154,14 +132,42 @@ const Home = () => {
             </div>
           </article>
 
+          {/* Binary Operations Section */}
           <article className="home-card">
-            <h3>Book Problem Solver</h3>
+            <h3>💾 Binary Operations</h3>
             <p>
-              Work through curated chapter problems with interactive helpers and visual explanations.
+              Work with binary data, parity bits, and bit manipulation for practical applications.
             </p>
-            <Link to="/book" className="home-card-link">
-              Go to Problems →
-            </Link>
+            <div className="home-card-links">
+              <Link to="/paritybitcalculator" className="home-card-link">
+                Parity Calculator
+              </Link>
+              <Link to="/bitconvertor" className="home-card-link">
+                Bit Converter
+              </Link>
+              <Link to="/bit-extension" className="home-card-link">
+                Bit Extension
+              </Link>
+              <Link to="/significant-digits" className="home-card-link">
+                Significant Digits
+              </Link>
+            </div>
+          </article>
+
+          {/* Additional Tools */}
+          <article className="home-card">
+            <h3>📚 Learning Resources</h3>
+            <p>
+              Access curated problems and additional tools to enhance your digital logic learning.
+            </p>
+            <div className="home-card-links">
+              <Link to="/book" className="home-card-link">
+                Book Problems
+              </Link>
+              <Link to="/timing-diagrams" className="home-card-link">
+                Timing Diagrams
+              </Link>
+            </div>
           </article>
         </section>
       </main>

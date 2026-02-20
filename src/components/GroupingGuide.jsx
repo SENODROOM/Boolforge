@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 import { WhiteboardAnimation } from './WhiteboardAnimation';
 
-export const GroupingGuide = ({ groups, variables, numVariables, grid, getColumnLabels, getRowLabels }) => {
+export const GroupingGuide = ({ groups, variables, numVariables, grid, getColumnLabels, getRowLabels, optimizationType = 'SOP' }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [showWhiteboard, setShowWhiteboard] = useState(true);
@@ -132,13 +132,17 @@ export const GroupingGuide = ({ groups, variables, numVariables, grid, getColumn
     );
 };
 
-const generateExplanations = (groups, variables, numVariables, grid) => {
+const generateExplanations = (groups, variables, numVariables, grid, optimizationType = 'SOP') => {
     const explanations = [];
+    const isPOS = optimizationType === 'POS';
+    const targetValue = isPOS ? 0 : 1;
+    const targetType = isPOS ? 'maxterms' : 'minterms';
+    const targetOperation = isPOS ? 'Product of Sums' : 'Sum of Products';
 
     // Introduction
     explanations.push({
-        title: 'Introduction to K-Map Grouping',
-        text: `Welcome to the Karnaugh Map grouping explanation. We have identified ${groups.length} group${groups.length !== 1 ? 's' : ''} in this K-map. The goal is to simplify the Boolean expression by grouping adjacent ones in powers of 2. Let's examine each group and understand how it contributes to the final simplified expression.`,
+        title: `Introduction to ${targetOperation} Grouping`,
+        text: `Welcome to Karnaugh Map grouping explanation for ${targetOperation.toLowerCase()}. We have identified ${groups.length} group${groups.length !== 1 ? 's' : ''} in this K-map. The goal is to simplify the Boolean expression by grouping adjacent ${targetValue}s in powers of 2. For ${targetOperation.toLowerCase()}, we group ${targetValue}s to create sum terms that will be multiplied together. Let's examine each group and understand how it contributes to the final simplified expression.`,
         type: 'intro',
         groupData: null
     });
@@ -147,29 +151,29 @@ const generateExplanations = (groups, variables, numVariables, grid) => {
     groups.forEach((group, index) => {
         const groupNumber = index + 1;
         const cellsText = group.size === 1 ? '1 cell' : `${group.size} cells`;
-        const mintermsText = group.minterms.join(', ');
+        const termsText = group.minterms.join(', ');
 
-        let explanation = `Group ${groupNumber} contains ${cellsText}, covering minterm${group.minterms.length > 1 ? 's' : ''} ${mintermsText}. `;
+        let explanation = `Group ${groupNumber} contains ${cellsText}, covering ${targetType} ${termsText}. `;
 
         // Analyze which variables are eliminated
-        const eliminatedVars = analyzeGroupVariables(group, variables, numVariables);
+        const eliminatedVars = analyzeGroupVariables(group, variables, numVariables, optimizationType);
 
         if (eliminatedVars.eliminated.length > 0) {
             explanation += `In this group, the variable${eliminatedVars.eliminated.length > 1 ? 's' : ''} ${eliminatedVars.eliminated.join(' and ')} ${eliminatedVars.eliminated.length > 1 ? 'change' : 'changes'} within the group, so ${eliminatedVars.eliminated.length > 1 ? 'they are' : 'it is'} eliminated. `;
         }
 
         if (eliminatedVars.kept.length > 0) {
-            explanation += `The variable${eliminatedVars.kept.length > 1 ? 's' : ''} ${eliminatedVars.kept.join(' and ')} ${eliminatedVars.kept.length > 1 ? 'remain' : 'remains'} constant in this group, contributing to the term ${eliminatedVars.term}. `;
+            explanation += `The variable${eliminatedVars.kept.length > 1 ? 's' : ''} ${eliminatedVars.kept.join(' and ')} ${eliminatedVars.kept.length > 1 ? 'remain' : 'remains'} constant in this group, contributing to the ${isPOS ? 'sum term' : 'product term'} ${eliminatedVars.term}. `;
         } else {
-            explanation += `All variables are eliminated, giving us a constant term of 1. `;
+            explanation += `All variables are eliminated, giving us a constant term of ${isPOS ? '0' : '1'}. `;
         }
 
-        explanation += `This is why this group represents the term ${eliminatedVars.term} in our simplified expression.`;
+        explanation += `This is why this group represents the ${isPOS ? 'sum term' : 'product term'} ${eliminatedVars.term} in our simplified ${targetOperation.toLowerCase()} expression.`;
 
         explanations.push({
             title: `Group ${groupNumber}: ${cellsText}`,
             text: explanation,
-            visualization: `Term: ${eliminatedVars.term}`,
+            visualization: `${isPOS ? 'Sum' : 'Product'} Term: ${eliminatedVars.term}`,
             type: 'group',
             groupData: {
                 ...group,
@@ -180,13 +184,13 @@ const generateExplanations = (groups, variables, numVariables, grid) => {
 
     // Final expression
     const finalTerms = groups.map((group) => {
-        const eliminatedVars = analyzeGroupVariables(group, variables, numVariables);
+        const eliminatedVars = analyzeGroupVariables(group, variables, numVariables, optimizationType);
         return eliminatedVars.term;
     });
 
     explanations.push({
         title: 'Final Simplified Expression',
-        text: `Combining all the terms from our groups, we get the final simplified Boolean expression. Each group we identified contributes one term. The terms are: ${finalTerms.join(', ')}. When we combine these with OR operations, we get our complete simplified expression. This is the most optimized form of the Boolean function based on the Karnaugh Map grouping method.`,
+        text: `Combining all the ${isPOS ? 'sum' : 'product'} terms from our groups, we get the final simplified Boolean expression. Each group we identified contributes one term. The terms are: ${finalTerms.join(', ')}. When we combine these with ${isPOS ? 'AND' : 'OR'} operations, we get our complete simplified ${targetOperation.toLowerCase()} expression. This is the most optimized form of the Boolean function based on Karnaugh Map grouping method.`,
         type: 'conclusion',
         groupData: { finalTerms }
     });
@@ -194,7 +198,8 @@ const generateExplanations = (groups, variables, numVariables, grid) => {
     return explanations;
 };
 
-const analyzeGroupVariables = (group, variables, numVariables) => {
+const analyzeGroupVariables = (group, variables, numVariables, optimizationType = 'SOP') => {
+    const isPOS = optimizationType === 'POS';
     // Convert minterms to binary and analyze
     const binaryMinterms = group.minterms.map(m =>
         m.toString(2).padStart(numVariables, '0')
@@ -211,7 +216,13 @@ const analyzeGroupVariables = (group, variables, numVariables) => {
             // Variable is constant
             const value = Array.from(values)[0];
             kept.push(variables[i]);
-            term += value === '1' ? variables[i] : `${variables[i]}'`;
+            if (isPOS) {
+                // For POS: 0 becomes variable, 1 becomes complemented
+                term += value === '0' ? variables[i] : `${variables[i]}'`;
+            } else {
+                // For SOP: 1 becomes variable, 0 becomes complemented
+                term += value === '1' ? variables[i] : `${variables[i]}'`;
+            }
         } else {
             // Variable changes, so it's eliminated
             eliminated.push(variables[i]);
@@ -219,7 +230,7 @@ const analyzeGroupVariables = (group, variables, numVariables) => {
     }
 
     if (term === '') {
-        term = '1';
+        term = isPOS ? '0' : '1';
     }
 
     return { eliminated, kept, term };
