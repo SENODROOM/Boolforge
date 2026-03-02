@@ -65,19 +65,17 @@ const CircuitCost = () => {
       // Count operators and their inputs
       let gateInputCount = 0;
       let currentGateInputs = 0;
-      let inParentheses = 0;
 
       for (let i = 0; i < expr.length; i++) {
         const char = expr[i];
 
         if (char === '(') {
-          inParentheses++;
+          // Opening parenthesis
         } else if (char === ')') {
           if (currentGateInputs > 0) {
             gateInputCount += currentGateInputs;
             currentGateInputs = 0;
           }
-          inParentheses--;
         } else if (/[A-Z]/.test(char)) {
           currentGateInputs++;
           // Skip complement if present

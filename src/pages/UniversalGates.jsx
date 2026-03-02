@@ -8,10 +8,10 @@ import { gateSymbols } from '../data/gates';
 const UniversalGates = () => {
   const [open, setOpen] = useState(false);
   const [selectedGate, setSelectedGate] = useState('NAND');
-  const [demoInputs, setDemoInputs] = useState([
+  const demoInputs = [
     { name: 'A', label: 'Input A' },
     { name: 'B', label: 'Input B' }
-  ]);
+  ];
 
   const expressions = [
     { expression: 'F = A·B + C·D', hint: 'Hint: Break into AND and OR operations' },
