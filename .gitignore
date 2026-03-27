@@ -25,4 +25,4 @@ yarn-error.log*
 # make-folder-txt
 .txtconfig
 .txtignore
-Boolforge.txt
+/Boolforge.txt
