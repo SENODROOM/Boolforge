@@ -161,6 +161,10 @@ const ENCODER_TYPES = {
   },
 };
 
+// encode function for the 8-to-3 block diagram (always active, independent of selectedType)
+const encode8to3 = ENCODER_TYPES["8to3"].encode;
+const encode4to2 = ENCODER_TYPES["4to2"].encode;
+
 // ─── Quiz ─────────────────────────────────────────────────────────────────────
 const ENCODER_QUIZ = [
   {
@@ -215,6 +219,7 @@ const ENCODER_QUIZ = [
     exp: "A0 is the LSB. In binary, odd numbers (1,3,5,7) always have their LSB=1. So A0 is simply the OR of all odd-indexed inputs. Pattern: look at which input indices have that bit set!",
   },
 ];
+
 const EncoderQuiz = () => {
   const [qi, setQi] = useState(0);
   const [sel, setSel] = useState(null);
@@ -369,6 +374,36 @@ const EncoderPage = () => {
   const [expandedEq, setExpandedEq] = useState(null);
   const [highlightRow, setHighlightRow] = useState(null);
 
+  // ── FIX: Dedicated independent state for the Section-2 block diagrams ──────
+  // These are always 8-to-3 and 4-to-2 block diagrams shown in "How it Works"
+  // regardless of which encoder type is selected in the simulator below.
+  const [diag4InputVals, setDiag4InputVals] = useState(Array(4).fill(0));
+  const [diag8InputVals, setDiag8InputVals] = useState(Array(8).fill(0));
+
+  const diag4Result = useMemo(
+    () => encode4to2(diag4InputVals),
+    [diag4InputVals],
+  );
+  const diag8Result = useMemo(
+    () => encode8to3(diag8InputVals),
+    [diag8InputVals],
+  );
+
+  const toggleDiag4Input = (idx) => {
+    const n = [...diag4InputVals];
+    n[idx] = n[idx] ? 0 : 1;
+    setDiag4InputVals(n);
+  };
+  const resetDiag4Inputs = () => setDiag4InputVals(Array(4).fill(0));
+
+  const toggleDiag8Input = (idx) => {
+    const n = [...diag8InputVals];
+    n[idx] = n[idx] ? 0 : 1;
+    setDiag8InputVals(n);
+  };
+  const resetDiag8Inputs = () => setDiag8InputVals(Array(8).fill(0));
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const config = ENCODER_TYPES[selectedType];
   const toggleInput = (idx) => {
     const n = [...inputVals];
@@ -456,29 +491,18 @@ const EncoderPage = () => {
             }}
           >
             <strong style={{ color: "#fbbf24" }}>
-              Example — A0 in an 8-to-3 encoder:
+              Example — A0 in 8-to-3 encoder:
             </strong>
             <br />
-            Which indices 0–7 have bit-0 = 1? → 1,3,5,7 (the odd ones)
+            Indices with bit-0=1: 1(001), 3(011), 5(101), 7(111)
             <br />
             <strong style={{ color: "#00ff88" }}>
               ∴ A0 = I1 + I3 + I5 + I7 ✅
             </strong>
-            <br />
-            <br />
-            <strong style={{ color: "#fbbf24" }}>
-              And A2 in an 8-to-3 encoder:
-            </strong>
-            <br />
-            Which indices have bit-2 = 1? → 4,5,6,7
-            <br />
-            <strong style={{ color: "#00ff88" }}>
-              ∴ A2 = I4 + I5 + I6 + I7 ✅
-            </strong>
           </p>
         </div>
         <div className="key-insight">
-          <h4>🧠 Encoder vs Decoder — The Inverse Relationship</h4>
+          <h4>🔄 Encoder vs Decoder — Two Sides of the Same Coin</h4>
           <p>
             Decoder: n-bit code → one of 2ⁿ output lines HIGH (expand).
             <br />
@@ -574,7 +598,7 @@ const EncoderPage = () => {
           ))}
         </div>
 
-        {/* LIVE 4-to-2 encoder circuit */}
+        {/* LIVE 4-to-2 encoder circuit — uses its own dedicated state */}
         <div
           style={{
             background: "rgba(8,14,28,0.9)",
@@ -622,7 +646,7 @@ const EncoderPage = () => {
             {["I0", "I1", "I2", "I3"].map((lbl, i) => (
               <button
                 key={lbl}
-                onClick={() => toggleInput(i)}
+                onClick={() => toggleDiag4Input(i)}
                 style={{
                   padding: "7px 14px",
                   borderRadius: "6px",
@@ -630,19 +654,19 @@ const EncoderPage = () => {
                   fontFamily: "monospace",
                   fontWeight: "700",
                   fontSize: "0.9rem",
-                  border: `2px solid ${inputVals[i] ? "#00ff88" : "rgba(148,163,184,0.25)"}`,
-                  background: inputVals[i]
+                  border: `2px solid ${diag4InputVals[i] ? "#00ff88" : "rgba(148,163,184,0.25)"}`,
+                  background: diag4InputVals[i]
                     ? "rgba(0,255,136,0.18)"
                     : "rgba(20,30,50,0.6)",
-                  color: inputVals[i] ? "#00ff88" : "#6b7280",
+                  color: diag4InputVals[i] ? "#00ff88" : "#6b7280",
                   transition: "all 0.2s",
                 }}
               >
-                {lbl}={inputVals[i]}
+                {lbl}={diag4InputVals[i]}
               </button>
             ))}
             <button
-              onClick={resetInputs}
+              onClick={resetDiag4Inputs}
               style={{
                 padding: "7px 14px",
                 borderRadius: "6px",
@@ -658,7 +682,7 @@ const EncoderPage = () => {
             </button>
           </div>
           <div style={{ overflowX: "auto" }}>
-            <Encoder4to2SVG inputVals={inputVals} result={result} />
+            <Encoder4to2SVG inputVals={diag4InputVals} result={diag4Result} />
           </div>
           <div
             style={{
@@ -670,20 +694,20 @@ const EncoderPage = () => {
               fontSize: "0.85rem",
             }}
           >
-            {result.active >= 0 ? (
+            {diag4Result.active >= 0 ? (
               <>
                 <span style={{ color: "#9ca3af" }}>Active: </span>
                 <span style={{ color: "#00ff88", fontWeight: "600" }}>
-                  I{result.active}
+                  I{diag4Result.active}
                 </span>
                 <span style={{ color: "#9ca3af" }}> → Code: </span>
                 <span style={{ color: "#fbbf24", fontWeight: "600" }}>
-                  A1={result.A1} A0={result.A0}
+                  A1={diag4Result.A1} A0={diag4Result.A0}
                 </span>
                 <span style={{ color: "#9ca3af" }}>
                   {" "}
-                  ({result.active}₁₀ ={" "}
-                  {result.active.toString(2).padStart(2, "0")}₂) &nbsp; V=1
+                  ({diag4Result.active}₁₀ ={" "}
+                  {diag4Result.active.toString(2).padStart(2, "0")}₂) &nbsp; V=1
                 </span>
               </>
             ) : (
@@ -694,7 +718,7 @@ const EncoderPage = () => {
           </div>
         </div>
 
-        {/* LIVE 8-to-3 encoder block */}
+        {/* LIVE 8-to-3 encoder block — uses its own dedicated state (FIX) */}
         <div
           style={{
             background: "rgba(8,14,28,0.9)",
@@ -732,7 +756,7 @@ const EncoderPage = () => {
             {["I0", "I1", "I2", "I3", "I4", "I5", "I6", "I7"].map((lbl, i) => (
               <button
                 key={lbl}
-                onClick={() => toggleInput(i)}
+                onClick={() => toggleDiag8Input(i)}
                 style={{
                   padding: "6px 12px",
                   borderRadius: "6px",
@@ -740,11 +764,11 @@ const EncoderPage = () => {
                   fontFamily: "monospace",
                   fontWeight: "700",
                   fontSize: "0.85rem",
-                  border: `2px solid ${inputVals[i] ? "#00ff88" : "rgba(148,163,184,0.2)"}`,
-                  background: inputVals[i]
+                  border: `2px solid ${diag8InputVals[i] ? "#00ff88" : "rgba(148,163,184,0.2)"}`,
+                  background: diag8InputVals[i]
                     ? "rgba(0,255,136,0.18)"
                     : "rgba(20,30,50,0.6)",
-                  color: inputVals[i] ? "#00ff88" : "#6b7280",
+                  color: diag8InputVals[i] ? "#00ff88" : "#6b7280",
                   transition: "all 0.2s",
                 }}
               >
@@ -752,7 +776,7 @@ const EncoderPage = () => {
               </button>
             ))}
             <button
-              onClick={resetInputs}
+              onClick={resetDiag8Inputs}
               style={{
                 padding: "6px 12px",
                 borderRadius: "6px",
@@ -768,14 +792,8 @@ const EncoderPage = () => {
             </button>
           </div>
           <div style={{ overflowX: "auto" }}>
-            <Encoder8to3SVG
-              inputVals={inputVals}
-              result={
-                result.active !== undefined && selectedType === "8to3"
-                  ? result
-                  : { A2: 0, A1: 0, A0: 0, V: 0, active: -1 }
-              }
-            />
+            {/* FIX: Always pass diag8InputVals and diag8Result — never zeroed-out defaults */}
+            <Encoder8to3SVG inputVals={diag8InputVals} result={diag8Result} />
           </div>
         </div>
 
@@ -936,10 +954,10 @@ const EncoderPage = () => {
                     padding: "9px 14px",
                     borderRadius: "8px",
                     transition: "all 0.2s",
-                    border: `2px solid ${val ? "#fbbf24" : "rgba(148,163,184,0.12)"}`,
+                    border: `2px solid ${val ? "#fbbf24" : "rgba(148,163,184,0.15)"}`,
                     background: val
                       ? "rgba(251,191,36,0.12)"
-                      : "rgba(10,16,30,0.6)",
+                      : "rgba(12,18,35,0.7)",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
@@ -947,20 +965,19 @@ const EncoderPage = () => {
                 >
                   <span
                     style={{
+                      color: val ? "#fbbf24" : "#9ca3af",
                       fontFamily: "monospace",
                       fontWeight: "600",
-                      color: "#e2e8f0",
                     }}
                   >
                     {name}
                   </span>
                   <span
                     style={{
+                      color: val ? "#fbbf24" : "#4b5563",
                       fontFamily: "monospace",
-                      fontSize: "1.2rem",
                       fontWeight: "700",
-                      color: val ? "#fbbf24" : "#374151",
-                      textShadow: val ? "0 0 10px #fbbf24" : "none",
+                      fontSize: "1.1rem",
                     }}
                   >
                     {val}
@@ -968,476 +985,181 @@ const EncoderPage = () => {
                 </div>
               ))}
             </div>
-            {result.active >= 0 && (
-              <div
+            {/* Truth Table */}
+            <div style={{ marginTop: "20px" }}>
+              <h4
                 style={{
-                  marginTop: "12px",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  background: "rgba(251,191,36,0.06)",
-                  border: "1px solid rgba(251,191,36,0.3)",
+                  color: "#93c5fd",
+                  marginBottom: "10px",
+                  fontSize: "0.85rem",
                 }}
               >
-                <p style={{ color: "#fbbf24", fontWeight: "600", margin: 0 }}>
-                  ✅ Code:{" "}
-                  {config.outputs
-                    .filter((o) => o !== "V")
-                    .map((o) => result[o] ?? 0)
-                    .join("")}
-                </p>
-                <p
+                Truth Table
+              </h4>
+              <div style={{ overflowX: "auto" }}>
+                <table
                   style={{
-                    color: "#9ca3af",
-                    margin: "4px 0 0",
-                    fontSize: "0.82rem",
-                  }}
-                >
-                  = decimal {result.active} &nbsp;|&nbsp; V=1 (valid)
-                </p>
-              </div>
-            )}
-            {result.active < 0 && (
-              <div
-                style={{
-                  marginTop: "12px",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  background: "rgba(107,114,128,0.06)",
-                  border: "1px solid rgba(107,114,128,0.2)",
-                }}
-              >
-                <p
-                  style={{
-                    color: "#6b7280",
-                    margin: 0,
+                    width: "100%",
+                    borderCollapse: "collapse",
                     fontFamily: "monospace",
+                    fontSize: "0.8rem",
                   }}
                 >
-                  No inputs active — V=0
-                </p>
+                  <thead>
+                    <tr>
+                      <th
+                        style={{
+                          padding: "6px 8px",
+                          background: "rgba(30,40,60,0.8)",
+                          color: "#60a5fa",
+                          borderBottom: "1px solid rgba(99,102,241,0.3)",
+                          textAlign: "center",
+                        }}
+                      >
+                        Active Input
+                      </th>
+                      {config.outputs.map((o) => (
+                        <th
+                          key={o}
+                          style={{
+                            padding: "6px 8px",
+                            background: "rgba(30,40,60,0.8)",
+                            color: "#fbbf24",
+                            borderBottom: "1px solid rgba(99,102,241,0.3)",
+                            textAlign: "center",
+                          }}
+                        >
+                          {o}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {config.truthRows.map((row, ri) => (
+                      <tr
+                        key={ri}
+                        style={{
+                          background:
+                            highlightRow === ri
+                              ? "rgba(0,255,136,0.08)"
+                              : "transparent",
+                          cursor: "pointer",
+                        }}
+                        onClick={() =>
+                          setHighlightRow(highlightRow === ri ? null : ri)
+                        }
+                      >
+                        {row.map((cell, ci) => (
+                          <td
+                            key={ci}
+                            style={{
+                              padding: "5px 8px",
+                              textAlign: "center",
+                              color:
+                                cell === "1"
+                                  ? "#00ff88"
+                                  : cell === "0"
+                                    ? "#4b5563"
+                                    : "#9ca3af",
+                              borderBottom: "1px solid rgba(99,102,241,0.1)",
+                            }}
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
+            </div>
           </div>
         </div>
-      </ExplanationBlock>
 
-      {/* ═══════════════════ SECTION 4: BOOLEAN EQS ═══════════════════ */}
-      <ExplanationBlock title={`Boolean Equations — ${config.label}`}>
-        <p className="explanation-intro">
-          Click any equation to understand the logic behind it.
-        </p>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-            marginTop: "12px",
-          }}
-        >
-          {config.booleanEqs.map(({ out, eq, explanation }, i) => (
-            <div key={out}>
-              <button
-                onClick={() => setExpandedEq(expandedEq === i ? null : i)}
+        {/* Boolean Equations */}
+        <div style={{ marginTop: "24px" }}>
+          <h4 style={{ color: "#a5b4fc", marginBottom: "14px" }}>
+            Boolean Equations
+          </h4>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+          >
+            {config.booleanEqs.map((eq, i) => (
+              <div
+                key={i}
                 style={{
-                  width: "100%",
-                  padding: "11px 16px",
-                  background:
-                    expandedEq === i
-                      ? "rgba(251,191,36,0.1)"
-                      : "rgba(251,191,36,0.04)",
-                  border: `1px solid ${expandedEq === i ? "rgba(251,191,36,0.5)" : "rgba(251,191,36,0.2)"}`,
-                  borderRadius: expandedEq === i ? "8px 8px 0 0" : "8px",
-                  fontFamily: "monospace",
-                  fontSize: "0.92rem",
-                  color: "#fde68a",
+                  background: "rgba(12,18,35,0.8)",
+                  border: "1px solid rgba(99,102,241,0.2)",
+                  borderRadius: "8px",
+                  padding: "14px",
                   cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.2s",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
                 }}
+                onClick={() => setExpandedEq(expandedEq === i ? null : i)}
               >
-                <span>
-                  <strong style={{ color: "#fbbf24" }}>{out}:</strong> {eq}
-                </span>
-                <span
-                  style={{
-                    color: "#6b7280",
-                    fontSize: "0.8rem",
-                    marginLeft: "8px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {expandedEq === i ? "▲" : "▼ explain"}
-                </span>
-              </button>
-              {expandedEq === i && (
                 <div
                   style={{
-                    padding: "12px 16px",
-                    background: "rgba(251,191,36,0.03)",
-                    border: "1px solid rgba(251,191,36,0.15)",
-                    borderTop: "none",
-                    borderRadius: "0 0 8px 8px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
+                  <code
+                    style={{
+                      color: "#fbbf24",
+                      fontFamily: "monospace",
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    {eq.eq}
+                  </code>
+                  <span style={{ color: "#6b7280", fontSize: "0.75rem" }}>
+                    {expandedEq === i ? "▲" : "▼"} explain
+                  </span>
+                </div>
+                {expandedEq === i && (
                   <p
                     style={{
                       color: "#9ca3af",
-                      margin: 0,
-                      fontSize: "0.88rem",
+                      fontSize: "0.85rem",
+                      marginTop: "10px",
                       lineHeight: "1.6",
                     }}
                   >
-                    💡 {explanation}
+                    {eq.explanation}
                   </p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="key-insight" style={{ marginTop: "16px" }}>
-          <h4>Why Encoders Only Need OR Gates (plain binary encoder)</h4>
-          <p>
-            Each output bit Aₖ is simply the OR of all inputs whose index has
-            bit k = 1. No AND, no NOT — just OR gates. This makes plain binary
-            encoders one of the cheapest circuits to implement. Priority
-            encoders add some AND gates for the masking logic, but the structure
-            remains very simple.
-          </p>
-        </div>
-      </ExplanationBlock>
-
-      {/* ═══════════════════ SECTION 5: TRUTH TABLE ═══════════════════ */}
-      <ExplanationBlock title={`Truth Table — ${config.label}`}>
-        <p className="explanation-intro" style={{ marginBottom: "10px" }}>
-          Hover any row to highlight. Active encoding is highlighted
-          automatically.
-        </p>
-        <div className="binary-table-container">
-          <table className="binary-table">
-            <thead className="binary-table-header">
-              <tr>
-                {selectedType === "4to2" ? (
-                  <>
-                    {config.inputs.map((i) => (
-                      <th key={i}>{i}</th>
-                    ))}
-                    {config.outputs.map((o) => (
-                      <th key={o}>{o}</th>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <th>Active Input</th>
-                    {config.outputs.map((o) => (
-                      <th key={o}>{o}</th>
-                    ))}
-                  </>
                 )}
-              </tr>
-            </thead>
-            <tbody>
-              {config.truthRows.map((row, ri) => {
-                const isActive = result.active === ri;
-                return (
-                  <tr
-                    key={ri}
-                    className="binary-table-row"
-                    onMouseEnter={() => setHighlightRow(ri)}
-                    onMouseLeave={() => setHighlightRow(null)}
-                    style={{
-                      background: isActive
-                        ? "rgba(251,191,36,0.07)"
-                        : highlightRow === ri
-                          ? "rgba(99,102,241,0.07)"
-                          : "transparent",
-                      cursor: "default",
-                      transition: "background 0.15s",
-                    }}
-                  >
-                    {row.map((cell, ci) => (
-                      <td
-                        key={ci}
-                        className={`binary-table-cell ${cell === "1" ? "binary-table-cell-primary" : ""}`}
-                        style={{
-                          fontWeight: isActive ? "700" : "normal",
-                          color:
-                            isActive && cell === "1" ? "#fbbf24" : undefined,
-                        }}
-                      >
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Circuit Modal trigger */}
+        {circuitConfigs[selectedType] && (
+          <div style={{ marginTop: "20px" }}>
+            <button
+              className="kmap-btn kmap-btn-secondary"
+              onClick={() => setOpenCircuit(selectedType)}
+            >
+              🔌 View Logic Gate Circuit
+            </button>
+          </div>
+        )}
       </ExplanationBlock>
 
-      {/* ═══════════════════ SECTION 6: APPLICATIONS ═══════════════════ */}
-      <ExplanationBlock title="Types of Encoders &amp; Real-World Applications">
-        <div className="comparison-grid">
-          {[
-            {
-              icon: "⚡",
-              title: "Flash ADC",
-              items: [
-                "2ⁿ comparators → one encoder",
-                "Fastest ADC topology possible",
-                "Converts thermometer code to binary",
-                "Used in high-speed oscilloscopes, radar",
-              ],
-            },
-            {
-              icon: "⌨️",
-              title: "Keyboard Encoder",
-              items: [
-                "Each key = one input line",
-                "Priority handles simultaneous keys",
-                "Encoder outputs scan code / ASCII",
-                "Debouncing circuit precedes encoder",
-              ],
-            },
-            {
-              icon: "🚨",
-              title: "Interrupt Controller (8259A)",
-              items: [
-                "8 interrupt request lines → 3-bit vector",
-                "Highest priority interrupt encoded first",
-                "CPU reads vector to find ISR address",
-                "Foundation of x86 interrupt handling",
-              ],
-            },
-            {
-              icon: "🖥️",
-              title: "Display Multiplexer",
-              items: [
-                "Multiple display positions compete",
-                "Encoder picks which digit to refresh",
-                "Feeds 7-segment decoder for display",
-                "Rapid cycling creates persistence illusion",
-              ],
-            },
-          ].map(({ icon, title, items }) => (
-            <div key={title} className="comparison-card">
-              <h5>
-                {icon} {title}
-              </h5>
-              <ul>
-                {items.map((it) => (
-                  <li key={it}>{it}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </ExplanationBlock>
-
-      {/* ═══════════════════ SECTION 7: QUIZ ═══════════════════ */}
-      <ExplanationBlock title="🧪 Knowledge Check — Test Yourself">
-        <p className="explanation-intro" style={{ marginBottom: "20px" }}>
-          6 questions on encoders, priority logic, and Boolean equations.
-        </p>
+      {/* ═══════════════════ SECTION 4: QUIZ ═══════════════════ */}
+      <ExplanationBlock title="Test Your Understanding">
         <EncoderQuiz />
-      </ExplanationBlock>
-
-      {/* ═══════════════════ SECTION 8: CIRCUIT BUTTONS ═══════════════════ */}
-      <ExplanationBlock title="Visualize in Circuit Forge">
-        <p className="explanation-intro" style={{ marginBottom: "8px" }}>
-          Open Circuit Forge with the encoder's Boolean expression pre-loaded.
-          Experiment with connecting OR gates to build the full encoder logic.
-        </p>
-        <div className="example-box" style={{ marginBottom: "20px" }}>
-          <h4>ℹ️ Variable mapping in Circuit Forge:</h4>
-          <ul>
-            <li>
-              <strong>4×2 Encoder:</strong> Loads A1 = C + D (C = I2, D = I3).
-              Wire C and D to an OR gate.
-            </li>
-            <li>
-              <strong>8×3 Encoder:</strong> Loads A2 = E + F + G + H (E=I4,
-              F=I5, G=I6, H=I7). Wire all four to a single OR gate.
-            </li>
-            <li>
-              A, B (and A–D for 8×3) are shown as inputs but not wired — these
-              represent the lower-index inputs not used by this output bit.
-            </li>
-          </ul>
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-            gap: "14px",
-          }}
-        >
-          <button
-            className="kmap-btn kmap-btn-primary"
-            style={{
-              padding: "16px 18px",
-              fontSize: "0.95rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-            }}
-            onClick={() => setOpenCircuit("4to2")}
-          >
-            🔌 Visualize 4×2 Encoder (A1 = I2 + I3)
-          </button>
-          <button
-            className="kmap-btn kmap-btn-primary"
-            style={{
-              padding: "16px 18px",
-              fontSize: "0.95rem",
-              background: "linear-gradient(135deg,#6366f1,#4f46e5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-            }}
-            onClick={() => setOpenCircuit("8to3")}
-          >
-            🔌 Visualize 8×3 Encoder (A2 = I4+I5+I6+I7)
-          </button>
-        </div>
       </ExplanationBlock>
 
       {openCircuit && circuitConfigs[openCircuit] && (
         <CircuitModal
-          open={true}
+          isOpen={!!openCircuit}
           onClose={() => setOpenCircuit(null)}
-          expression={circuitConfigs[openCircuit].expression}
-          variables={circuitConfigs[openCircuit].variables}
+          {...circuitConfigs[openCircuit]}
         />
       )}
-
-      <style jsx>{`
-        .comparison-card h5 {
-          color: #93c5fd;
-          margin-bottom: 10px;
-          font-size: 0.95rem;
-        }
-        .comparison-card ul {
-          color: #9ca3af;
-          padding-left: 18px;
-          margin: 0;
-        }
-        .comparison-card li {
-          margin-bottom: 6px;
-          line-height: 1.5;
-        }
-        .info-card {
-          background: rgba(15, 23, 42, 0.6);
-          border: 1px solid rgba(148, 163, 184, 0.25);
-          border-radius: 12px;
-          padding: 20px;
-          margin-top: 16px;
-        }
-        .info-card h4 {
-          color: #93c5fd;
-          margin-bottom: 10px;
-        }
-        .info-card ul,
-        .info-card p {
-          color: #9ca3af;
-          padding-left: 18px;
-          margin: 0;
-        }
-        .info-card li {
-          margin-bottom: 6px;
-          line-height: 1.5;
-        }
-        .example-box {
-          background: rgba(251, 191, 36, 0.07);
-          border: 1px solid rgba(251, 191, 36, 0.3);
-          border-radius: 12px;
-          padding: 20px;
-          margin-top: 16px;
-        }
-        .example-box h4 {
-          color: #fbbf24;
-          margin-bottom: 10px;
-        }
-        .example-box ul,
-        .example-box p,
-        .example-box code {
-          color: #9ca3af;
-          padding-left: 18px;
-          margin: 4px 0 0;
-        }
-        .example-box code {
-          background: rgba(0, 0, 0, 0.3);
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-family: monospace;
-          color: #c4b5fd;
-        }
-        .example-box li {
-          margin-bottom: 6px;
-          line-height: 1.5;
-        }
-        .key-insight {
-          background: rgba(34, 197, 94, 0.08);
-          border: 1px solid rgba(34, 197, 94, 0.3);
-          border-radius: 12px;
-          padding: 20px;
-          margin-top: 16px;
-        }
-        .key-insight h4 {
-          color: #86efac;
-          margin-bottom: 10px;
-        }
-        .key-insight p {
-          color: #9ca3af;
-          margin: 0;
-          line-height: 1.7;
-        }
-        .comparison-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 16px;
-          margin-top: 16px;
-        }
-        .comparison-card {
-          background: rgba(15, 23, 42, 0.5);
-          border: 1px solid rgba(148, 163, 184, 0.2);
-          border-radius: 10px;
-          padding: 16px;
-        }
-        .binary-table-container {
-          overflow-x: auto;
-          margin-top: 12px;
-        }
-        .binary-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        .binary-table-header th {
-          background: rgba(99, 102, 241, 0.2);
-          color: #93c5fd;
-          padding: 9px 12px;
-          text-align: center;
-          border: 1px solid rgba(148, 163, 184, 0.2);
-          font-family: monospace;
-        }
-        .binary-table-row td {
-          padding: 7px 12px;
-          text-align: center;
-          border: 1px solid rgba(148, 163, 184, 0.1);
-          color: #e2e8f0;
-          font-family: monospace;
-        }
-        .binary-table-cell-primary {
-          color: #00ff88 !important;
-          font-weight: 700;
-        }
-      `}</style>
     </ToolLayout>
   );
 };
+
 export default EncoderPage;
