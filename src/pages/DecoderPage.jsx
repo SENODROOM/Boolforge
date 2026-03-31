@@ -757,7 +757,6 @@ const FunctionGeneratorDemo = () => {
       n[i] = !n[i];
       return n;
     });
-  const inputs = ["A1", "A0"];
   const selected = funcRows.map((on, i) => (on ? i : -1)).filter((i) => i >= 0);
   const equation =
     selected.length === 0

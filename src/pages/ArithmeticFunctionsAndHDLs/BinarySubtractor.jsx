@@ -100,8 +100,6 @@ const QUIZ = [
 const BinarySubtractor = () => {
   const [a, setA] = useState("1100");
   const [b, setB] = useState("0011");
-  const [showBorrowTrace, setShowBorrowTrace] = useState(false);
-  const [showTwosMethod, setShowTwosMethod] = useState(false);
   const [showTruthTable, setShowTruthTable] = useState(false);
   const [showHDL, setShowHDL] = useState(false);
   const [animStep, setAnimStep] = useState(-1);

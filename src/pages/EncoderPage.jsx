@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 
 /* ═══════════════════════════════════════════════════════════════════
    ENCODER PAGE — Upgraded with:
@@ -1495,6 +1495,7 @@ const EncoderSimulator = () => {
   const [selectedType, setSelectedType] = useState("4to2");
   const [inputVals, setInputVals] = useState(Array(10).fill(0));
   const [expandedEq, setExpandedEq] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [lastChanged, setLastChanged] = useState(null);
 
   const config = ENCODER_TYPES[selectedType];
@@ -1510,11 +1511,13 @@ const EncoderSimulator = () => {
   };
   const activeVals = inputVals.slice(0, config.inputs.length);
   const result = useMemo(() => config.encode(activeVals), [config, activeVals]);
-  const outputEntries = config.outputs.map((name) => ({
+
+  const outputEntries = Object.keys(config.outputs).map((name) => ({
     name,
     val: result[name] ?? 0,
   }));
 
+  // eslint-disable-next-line no-unused-vars
   const handleTypeChange = (type) => {
     setSelectedType(type);
     setInputVals(Array(10).fill(0));
