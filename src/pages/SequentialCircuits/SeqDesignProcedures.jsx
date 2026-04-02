@@ -4,196 +4,154 @@ import SeqLayout from "./SeqLayout";
 const SeqDesignProcedures = () => (
   <SeqLayout
     title="Design Procedures"
-    subtitle="A systematic methodology for designing synchronous sequential circuits from a word problem to a working circuit."
+    subtitle="A systematic methodology for designing synchronous sequential circuits — from word problem to working schematic."
   >
-    <div className="seq-content">
+    <div className="seq-content-body">
 
       <div className="seq-box">
-        <p className="seq-box-title">Overview</p>
+        <span className="seq-box-title">Design vs Analysis</span>
         <p>
-          <strong>Design</strong> is the reverse of analysis. Given a word description or
-          behavioral specification, you derive the circuit schematic. The design process
-          is systematic and follows well-defined steps.
+          <strong>Analysis</strong> starts with a circuit and finds its behavior.
+          <strong>Design</strong> starts with a behavior specification and derives the circuit.
+          The process is systematic and reversible.
         </p>
       </div>
 
-      <h2>Complete Design Procedure</h2>
-      <p>The standard design procedure for synchronous sequential circuits is:</p>
+      <h2>Complete 9-Step Design Flow</h2>
 
-      <div className="seq-box info">
-        <p className="seq-box-title">Design Steps (in order)</p>
-        <p>
-          1. Understand the problem specification<br/>
-          2. Determine number of states and draw state diagram<br/>
-          3. Construct state table<br/>
-          4. State reduction (minimize number of states)<br/>
-          5. State assignment (assign binary codes to states)<br/>
-          6. Select flip-flop type<br/>
-          7. Derive flip-flop input equations using excitation tables<br/>
-          8. Derive output equations<br/>
-          9. Draw the logic circuit
-        </p>
+      <div className="seq-grid-2">
+        <div className="seq-feature-card"><span className="seq-feature-icon">📋</span><p className="seq-feature-title">1. Understand the Spec</p><p className="seq-feature-desc">Identify inputs, outputs, and what must be remembered between clock cycles.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">🗺️</span><p className="seq-feature-title">2. Draw State Diagram</p><p className="seq-feature-desc">Sketch a directed graph of all states and transitions for all inputs.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">📊</span><p className="seq-feature-title">3. Build State Table</p><p className="seq-feature-desc">Convert the diagram into a tabular form with all present state / input / next state / output entries.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">✂️</span><p className="seq-feature-title">4. Reduce States</p><p className="seq-feature-desc">Merge equivalent states to minimize hardware. Fewer states = fewer flip-flops.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">🔢</span><p className="seq-feature-title">5. State Assignment</p><p className="seq-feature-desc">Assign unique binary codes to each state. Need ⌈log₂(n)⌉ flip-flops for n states.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">🔁</span><p className="seq-feature-title">6. Choose FF Type</p><p className="seq-feature-desc">Select D, JK, T, or SR based on which gives simpler input logic for your state transitions.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">📐</span><p className="seq-feature-title">7. Derive FF Inputs</p><p className="seq-feature-desc">Use excitation tables + K-maps to find minimal Boolean equations for each FF input.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">📤</span><p className="seq-feature-title">8. Derive Outputs</p><p className="seq-feature-desc">Use K-maps to find output equations — f(state) for Moore, f(state,input) for Mealy.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">🔌</span><p className="seq-feature-title">9. Draw the Circuit</p><p className="seq-feature-desc">Implement all equations as gates feeding the flip-flops, with state feedback.</p></div>
       </div>
 
       <h2>Step 1 — Problem Specification</h2>
-      <p>
-        Carefully read the problem. Identify:
-      </p>
+      <p>Carefully identify:</p>
       <ul>
-        <li>The <strong>inputs</strong> (what triggers state changes)</li>
-        <li>The <strong>outputs</strong> (what the circuit must produce)</li>
-        <li>The <strong>memory requirement</strong> (what needs to be remembered between clock cycles)</li>
-        <li>Whether this is a <strong>Moore</strong> (outputs depend on state only) or
-          <strong>Mealy</strong> (outputs depend on state + inputs) machine</li>
+        <li><strong>Inputs</strong> — what triggers state changes</li>
+        <li><strong>Outputs</strong> — what the circuit must produce</li>
+        <li><strong>Memory</strong> — what must be remembered between clocks</li>
+        <li><strong>Machine type</strong> — Moore (output on state) or Mealy (output on transition)</li>
       </ul>
 
-      <h2>Step 2 — State Diagram</h2>
-      <p>
-        Sketch a <strong>state diagram</strong> (directed graph) where:
-      </p>
-      <ul>
-        <li>Each <strong>circle</strong> represents a state</li>
-        <li>Each <strong>arrow</strong> represents a transition (labeled with input)</li>
-        <li>For Moore: output is labeled <em>inside</em> the state circle</li>
-        <li>For Mealy: output is labeled <em>on the transition arrow</em></li>
-      </ul>
+      <h2>Step 5 — State Assignment Strategies</h2>
+      <div className="seq-table-wrap">
+        <table className="seq-table">
+          <thead><tr><th>Strategy</th><th>Description</th><th>Best For</th></tr></thead>
+          <tbody>
+            <tr><td>Binary sequential</td><td>00, 01, 10, 11 …</td><td>Simple, easy to analyze</td></tr>
+            <tr><td>Gray code</td><td>00, 01, 11, 10 …</td><td>Minimizes transitions → simpler logic</td></tr>
+            <tr><td>One-hot</td><td>0001, 0010, 0100 …</td><td>FPGAs with abundant flip-flops</td></tr>
+            <tr><td>Output-based</td><td>State code = output value</td><td>Simplifies output logic</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-      <h2>Step 3 — State Table</h2>
+      <h2>Step 6 — Choosing Flip-Flop Type</h2>
+      <div className="seq-table-wrap">
+        <table className="seq-table">
+          <thead><tr><th>Flip-Flop</th><th>Input Logic Complexity</th><th>Don't-Cares in Excitation</th></tr></thead>
+          <tbody>
+            <tr><td>D</td><td>Simplest (D = Q⁺)</td><td>None</td></tr>
+            <tr><td>JK</td><td>Moderate, but more X's help K-maps</td><td>Most (2 per row)</td></tr>
+            <tr><td>T</td><td>Simple for counters</td><td>None</td></tr>
+            <tr><td>SR</td><td>Moderate, has forbidden state</td><td>Some</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Design Example — "101" Sequence Detector</h2>
       <p>
-        Convert the state diagram into a tabular form — the <strong>state table</strong>:
+        Design a <strong>Moore machine</strong> that outputs Z=1 when the last three bits of the
+        serial input x form the pattern <strong>"101"</strong> (overlapping detection allowed).
       </p>
+
+      <div className="seq-box info">
+        <span className="seq-box-title">State Plan</span>
+        <p>
+          <strong>S0</strong> — No progress (initial / reset state), Z=0<br/>
+          <strong>S1</strong> — Received "1", Z=0<br/>
+          <strong>S2</strong> — Received "10", Z=0<br/>
+          <strong>S3</strong> — Received "101" ✓, Z=1
+        </p>
+      </div>
+
+      <div className="seq-diagram">
+        <svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono',monospace"}}>
+          <defs>
+            <marker id="aDp" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto">
+              <path d="M0,0 L0,5 L7,2.5z" fill="#10b981"/>
+            </marker>
+          </defs>
+          {/* States */}
+          {[[80,125,"S0","Z=0"],[220,60,"S1","Z=0"],[360,60,"S2","Z=0"],[460,125,"S3","Z=1"]].map(([cx,cy,s,z])=>(
+            <g key={s}>
+              <circle cx={cx} cy={cy} r="36" fill="rgba(30,27,75,.9)"
+                stroke={s==="S3"?"#10b981":"#6366f1"} strokeWidth="2.5"/>
+              <text x={cx} y={cy-4} fontSize="13" fill={s==="S3"?"#34d399":"#c7d2fe"} textAnchor="middle" fontWeight="700">{s}</text>
+              <text x={cx} y={cy+13} fontSize="9" fill={s==="S3"?"#10b981":"#475569"} textAnchor="middle">{z}</text>
+            </g>
+          ))}
+          {/* S0 → S1 (x=1) */}
+          <path d="M113,108 Q160,65 184,70" fill="none" stroke="#10b981" strokeWidth="2" markerEnd="url(#aDp)"/>
+          <text x="140" y="72" fontSize="10" fill="#fbbf24" fontWeight="700">x=1</text>
+          {/* S1 → S2 (x=0) */}
+          <line x1="256" y1="60" x2="324" y2="60" stroke="#10b981" strokeWidth="2" markerEnd="url(#aDp)"/>
+          <text x="285" y="52" fontSize="10" fill="#fbbf24" fontWeight="700">x=0</text>
+          {/* S2 → S3 (x=1) */}
+          <path d="M393,78 Q420,95 428,105" fill="none" stroke="#10b981" strokeWidth="2" markerEnd="url(#aDp)"/>
+          <text x="420" y="85" fontSize="10" fill="#fbbf24" fontWeight="700">x=1</text>
+          {/* S0 self-loop (x=0) */}
+          <path d="M58,100 Q20,70 58,90" fill="none" stroke="#6366f1" strokeWidth="1.5" markerEnd="url(#aDp)" strokeDasharray="4"/>
+          <text x="12" y="82" fontSize="9" fill="#6366f1">x=0</text>
+          {/* S1 → S0 (x=1) */}
+          <path d="M220,96 Q150,145 108,140" fill="none" stroke="#ef4444" strokeWidth="1.5" markerEnd="url(#aDp)" strokeDasharray="4"/>
+          <text x="154" y="145" fontSize="9" fill="#ef4444">x=1 → S1</text>
+          {/* S1 self back to S0 x=0 already done, S1 on x=1 → S1 self */}
+          {/* S2 → S0 (x=0) */}
+          <path d="M340,88 Q240,195 108,155" fill="none" stroke="#ef4444" strokeWidth="1.5" markerEnd="url(#aDp)" strokeDasharray="4"/>
+          <text x="225" y="205" fontSize="9" fill="#ef4444">x=0 → S0</text>
+          {/* S3 → S1 (x=1, overlap) */}
+          <path d="M460,161 Q460,220 220,96" fill="none" stroke="#818cf8" strokeWidth="1.5" markerEnd="url(#aDp)" strokeDasharray="4"/>
+          <text x="360" y="235" fontSize="9" fill="#818cf8">x=1 → S1 (overlap)</text>
+          {/* S3 → S0 (x=0) */}
+          <path d="M428,152 Q350,200 112,155" fill="none" stroke="#818cf8" strokeWidth="1.2" markerEnd="url(#aDp)" strokeDasharray="3"/>
+          {/* Initial arrow */}
+          <line x1="20" y1="125" x2="44" y2="125" stroke="#94a3b8" strokeWidth="1.5" markerEnd="url(#aDp)"/>
+          <text x="4" y="122" fontSize="8" fill="#64748b">start</text>
+        </svg>
+        <p className="seq-diagram-caption">Figure 1 — Moore FSM for "101" overlapping sequence detector</p>
+      </div>
+
+      <h2>State Table (after assignment: S0=00, S1=01, S2=10, S3=11)</h2>
       <div className="seq-table-wrap">
         <table className="seq-table">
           <thead>
-            <tr><th>Present State</th><th>Input (x=0)</th><th>Input (x=1)</th><th>Output</th></tr>
+            <tr><th>Present Q₁Q₀</th><th>x=0 → Next</th><th>x=1 → Next</th><th>Output Z</th></tr>
           </thead>
           <tbody>
-            <tr><td>A</td><td>A</td><td>B</td><td>0</td></tr>
-            <tr><td>B</td><td>C</td><td>B</td><td>0</td></tr>
-            <tr><td>C</td><td>A</td><td>D</td><td>0</td></tr>
-            <tr><td>D</td><td>A</td><td>B</td><td>1</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p><em>Generic example — your specific problem will have different states and transitions.</em></p>
-
-      <h2>Step 4 — State Reduction</h2>
-      <p>
-        Remove redundant (equivalent) states to minimize hardware. Two states are
-        <strong>equivalent</strong> if they produce the same output for all inputs AND
-        transition to equivalent next states. See the "State Reduction & Excitation Tables"
-        page for full coverage.
-      </p>
-
-      <h2>Step 5 — State Assignment</h2>
-      <p>
-        Assign a unique binary code to each state. For n states, you need at least
-        ⌈log₂(n)⌉ flip-flops. The assignment affects the complexity of the combinational
-        logic — different assignments can yield simpler or more complex equations.
-      </p>
-      <div className="seq-table-wrap">
-        <table className="seq-table">
-          <thead><tr><th>State</th><th>Q₁</th><th>Q₀</th></tr></thead>
-          <tbody>
-            <tr><td>A</td><td>0</td><td>0</td></tr>
-            <tr><td>B</td><td>0</td><td>1</td></tr>
-            <tr><td>C</td><td>1</td><td>0</td></tr>
-            <tr><td>D</td><td>1</td><td>1</td></tr>
+            <tr><td>00 (S0)</td><td>00</td><td>01</td><td>0</td></tr>
+            <tr><td>01 (S1)</td><td>10</td><td>01</td><td>0</td></tr>
+            <tr><td>10 (S2)</td><td>00</td><td>11</td><td>0</td></tr>
+            <tr><td>11 (S3)</td><td>00</td><td>01</td><td>1</td></tr>
           </tbody>
         </table>
       </div>
 
-      <h2>Step 6 — Choose Flip-Flop Type</h2>
-      <p>
-        Select the flip-flop type based on your design goals:
-      </p>
-      <ul>
-        <li><strong>D flip-flop</strong> — simplest input logic, directly sets next state</li>
-        <li><strong>JK flip-flop</strong> — can minimize logic for state transitions that toggle</li>
-        <li><strong>T flip-flop</strong> — optimal for counter circuits</li>
-        <li><strong>SR flip-flop</strong> — useful when set/reset operations map naturally to the spec</li>
-      </ul>
-
-      <h2>Step 7 — Derive Flip-Flop Input Equations</h2>
-      <p>
-        Using the assigned state table and the flip-flop's <strong>excitation table</strong>
-        (what inputs are needed to achieve each Q→Q⁺ transition), fill in the input values
-        for each state transition. Then use K-maps to minimize the Boolean expressions for
-        each flip-flop input.
-      </p>
-
-      <h2>Step 8 — Derive Output Equations</h2>
-      <p>
-        For a Moore machine: output = f(present state) — use the state table and K-maps.<br/>
-        For a Mealy machine: output = f(present state, inputs) — use K-maps over state+input.
-      </p>
-
-      <h2>Step 9 — Draw the Circuit</h2>
-      <p>
-        Implement the flip-flop input equations and output equations as combinational logic
-        (using gates, muxes, etc.) feeding into the selected flip-flops. The flip-flop
-        outputs (Q) feed back to the combinational logic, forming the complete sequential circuit.
-      </p>
-
-      <h2>Design Example: Sequence Detector</h2>
-      <p>
-        Design a Moore machine that outputs Z=1 when the input sequence "101" is detected
-        (overlapping detection allowed).
-      </p>
-
-      <div className="seq-diagram">
-        <svg viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono', monospace"}}>
-          <defs>
-            <marker id="arre" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#00ff88"/>
-            </marker>
-          </defs>
-          {/* States: S0, S1, S2, S3 */}
-          <circle cx="80" cy="120" r="32" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="80" y="116" fontSize="11" fill="#00d4ff" textAnchor="middle" fontWeight="700">S0</text>
-          <text x="80" y="130" fontSize="9" fill="#8b9dc3" textAnchor="middle">Z=0</text>
-
-          <circle cx="200" cy="60" r="32" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="200" y="56" fontSize="11" fill="#00d4ff" textAnchor="middle" fontWeight="700">S1</text>
-          <text x="200" y="70" fontSize="9" fill="#8b9dc3" textAnchor="middle">Z=0 (got 1)</text>
-
-          <circle cx="340" cy="60" r="32" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="340" y="56" fontSize="11" fill="#00d4ff" textAnchor="middle" fontWeight="700">S2</text>
-          <text x="340" y="70" fontSize="9" fill="#8b9dc3" textAnchor="middle">Z=0 (got 10)</text>
-
-          <circle cx="440" cy="120" r="32" fill="#1e2842" stroke="#00ff88" strokeWidth="2.5"/>
-          <text x="440" y="116" fontSize="11" fill="#00ff88" textAnchor="middle" fontWeight="700">S3</text>
-          <text x="440" y="130" fontSize="9" fill="#00ff88" textAnchor="middle">Z=1 (101!)</text>
-
-          {/* Transitions */}
-          <line x1="111" y1="105" x2="171" y2="72" stroke="#00ff88" strokeWidth="1.8" markerEnd="url(#arre)"/>
-          <text x="128" y="84" fontSize="10" fill="#fbbf24">1</text>
-
-          <line x1="232" y1="60" x2="308" y2="60" stroke="#00ff88" strokeWidth="1.8" markerEnd="url(#arre)"/>
-          <text x="265" y="52" fontSize="10" fill="#fbbf24">0</text>
-
-          <line x1="369" y1="82" x2="416" y2="105" stroke="#00ff88" strokeWidth="1.8" markerEnd="url(#arre)"/>
-          <text x="400" y="88" fontSize="10" fill="#fbbf24">1</text>
-
-          {/* Back to S0 on 0 */}
-          <line x1="200" y1="92" x2="100" y2="115" stroke="#ff3366" strokeWidth="1.5" strokeDasharray="4" markerEnd="url(#arre)"/>
-          <text x="130" y="110" fontSize="9" fill="#ff3366">0→S0</text>
-
-          {/* S3 overlap back to S1 on 1 */}
-          <path d="M440,152 Q440,200 200,200 Q100,200 80,152" fill="none" stroke="#00d4ff" strokeWidth="1.5" strokeDasharray="4" markerEnd="url(#arre)"/>
-          <text x="255" y="215" fontSize="9" fill="#00d4ff">0→S0 | 1→S1</text>
-        </svg>
-        <p className="seq-diagram-caption">Figure 1 — Partial state diagram for "101" sequence detector</p>
-      </div>
-
-      <div className="seq-box info">
-        <p className="seq-box-title">Design Checklist</p>
+      <div className="seq-box success">
+        <span className="seq-box-title">Design Checklist</span>
         <p>
           ✓ All states reachable from the initial state<br/>
-          ✓ No undefined transitions (every input handled in every state)<br/>
+          ✓ Every state handles all possible inputs<br/>
           ✓ Initial/reset state clearly defined<br/>
-          ✓ Output correct in all states<br/>
-          ✓ Don't-care states handled appropriately
+          ✓ Output correct in every state / transition<br/>
+          ✓ Don't-care states used where appropriate
         </p>
       </div>
 

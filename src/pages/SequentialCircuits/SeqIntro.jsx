@@ -6,22 +6,22 @@ const SeqIntro = () => (
     title="Introduction to Sequential Circuits"
     subtitle="Understanding circuits with memory — where outputs depend on both current inputs and past history."
   >
-    <div className="seq-content">
+    <div className="seq-content-body">
 
       <div className="seq-box">
-        <p className="seq-box-title">Definition</p>
+        <span className="seq-box-title">Core Definition</span>
         <p>
-          A <strong>sequential circuit</strong> is a digital circuit whose output depends not only on the
-          current inputs but also on the <strong>history of past inputs</strong>. It contains memory
-          elements that store state information between clock cycles.
+          A <strong>sequential circuit</strong> is a digital circuit whose output depends not only on
+          the current inputs but also on the <strong>history of past inputs</strong>. It contains
+          memory elements that store state information between clock cycles.
         </p>
       </div>
 
-      <h2>Combinational vs Sequential Circuits</h2>
+      <h2>Combinational vs Sequential</h2>
       <p>
-        In a <strong>combinational circuit</strong>, the output at any instant is determined purely by the
-        current inputs — there is no memory. In contrast, a <strong>sequential circuit</strong> has
-        feedback paths and storage elements, allowing it to "remember" previous inputs.
+        In a <strong>combinational circuit</strong>, output is determined purely by the current inputs —
+        there is no memory. In a <strong>sequential circuit</strong>, feedback paths and storage
+        elements allow the circuit to "remember" previous states.
       </p>
 
       <div className="seq-table-wrap">
@@ -34,108 +34,122 @@ const SeqIntro = () => (
             </tr>
           </thead>
           <tbody>
-            <tr><td>Output depends on</td><td>Current inputs only</td><td>Current inputs + stored state</td></tr>
+            <tr><td>Output depends on</td><td>Current inputs only</td><td>Inputs + stored state</td></tr>
             <tr><td>Memory elements</td><td>None</td><td>Flip-flops / Latches</td></tr>
-            <tr><td>Feedback</td><td>No</td><td>Yes</td></tr>
-            <tr><td>Clock required</td><td>No (usually)</td><td>Yes (synchronous type)</td></tr>
+            <tr><td>Feedback paths</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Clock required</td><td>No (usually)</td><td>Yes (synchronous)</td></tr>
             <tr><td>Examples</td><td>Adder, Mux, Decoder</td><td>Counter, Register, FSM</td></tr>
           </tbody>
         </table>
       </div>
 
-      <h2>General Model of a Sequential Circuit</h2>
-      <p>
-        Every sequential circuit can be modelled with three key parts:
-      </p>
-      <ul>
-        <li><strong>Combinational logic block</strong> — computes the next state and outputs</li>
-        <li><strong>Memory elements (flip-flops)</strong> — hold the current state</li>
-        <li><strong>Feedback path</strong> — current state feeds back into the combinational block</li>
-      </ul>
+      <h2>General Model</h2>
+      <p>Every sequential circuit has three fundamental parts:</p>
+
+      <div className="seq-grid-2">
+        <div className="seq-feature-card">
+          <span className="seq-feature-icon">⚙️</span>
+          <p className="seq-feature-title">Combinational Logic</p>
+          <p className="seq-feature-desc">Computes the next state and output values from current state and inputs.</p>
+        </div>
+        <div className="seq-feature-card">
+          <span className="seq-feature-icon">💾</span>
+          <p className="seq-feature-title">Memory Elements</p>
+          <p className="seq-feature-desc">Flip-flops that hold the current state between clock cycles.</p>
+        </div>
+        <div className="seq-feature-card">
+          <span className="seq-feature-icon">🔄</span>
+          <p className="seq-feature-title">Feedback Path</p>
+          <p className="seq-feature-desc">Current state feeds back into the combinational block to influence the next state.</p>
+        </div>
+      </div>
 
       <div className="seq-diagram">
-        <svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono', monospace"}}>
-          {/* Input arrow */}
-          <line x1="20" y1="130" x2="90" y2="130" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arr)"/>
-          <text x="10" y="120" fontSize="11" fill="#8b9dc3">Inputs</text>
-          {/* Combinational box */}
-          <rect x="90" y="80" width="160" height="100" rx="6" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="170" y="126" fontSize="12" fill="#00d4ff" textAnchor="middle">Combinational</text>
-          <text x="170" y="142" fontSize="12" fill="#00d4ff" textAnchor="middle">Logic</text>
-          {/* Output arrow */}
-          <line x1="250" y1="110" x2="360" y2="110" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arr)"/>
-          <text x="362" y="114" fontSize="11" fill="#8b9dc3">Outputs</text>
-          {/* State to FF */}
-          <line x1="250" y1="150" x2="310" y2="150" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arr)"/>
-          <text x="260" y="144" fontSize="10" fill="#fbbf24">Next State</text>
-          {/* Flip-flop box */}
-          <rect x="310" y="100" width="140" height="100" rx="6" fill="#1e2842" stroke="#fbbf24" strokeWidth="2"/>
-          <text x="380" y="146" fontSize="12" fill="#fbbf24" textAnchor="middle">Memory</text>
-          <text x="380" y="162" fontSize="12" fill="#fbbf24" textAnchor="middle">(Flip-Flops)</text>
-          {/* Feedback */}
-          <line x1="380" y1="200" x2="380" y2="240" stroke="#00ff88" strokeWidth="2"/>
-          <line x1="380" y1="240" x2="60" y2="240" stroke="#00ff88" strokeWidth="2"/>
-          <line x1="60" y1="240" x2="60" y2="150" stroke="#00ff88" strokeWidth="2"/>
-          <line x1="60" y1="150" x2="90" y2="150" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arr)"/>
-          <text x="180" y="255" fontSize="10" fill="#8b9dc3" textAnchor="middle">Current State (feedback)</text>
-          {/* Arrow marker */}
+        <svg viewBox="0 0 620 270" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono',monospace"}}>
           <defs>
-            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#00ff88"/>
+            <marker id="a0" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3z" fill="#6366f1"/>
             </marker>
+            <filter id="glow0">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
           </defs>
+          {/* Input */}
+          <line x1="20" y1="135" x2="90" y2="135" stroke="#6366f1" strokeWidth="2" markerEnd="url(#a0)"/>
+          <text x="12" y="122" fontSize="11" fill="#94a3b8">Inputs</text>
+          {/* Combinational box */}
+          <rect x="90" y="80" width="170" height="110" rx="10" fill="rgba(30,27,75,0.9)" stroke="#6366f1" strokeWidth="2"/>
+          <rect x="90" y="80" width="170" height="4" rx="2" fill="#6366f1" opacity="0.6"/>
+          <text x="175" y="132" fontSize="12" fill="#a5b4fc" textAnchor="middle" fontWeight="700">Combinational</text>
+          <text x="175" y="150" fontSize="11" fill="#64748b" textAnchor="middle">Logic Block</text>
+          {/* Output */}
+          <line x1="260" y1="110" x2="400" y2="110" stroke="#10b981" strokeWidth="2" markerEnd="url(#a0)" filter="url(#glow0)"/>
+          <text x="408" y="114" fontSize="11" fill="#10b981" fontWeight="700">Outputs</text>
+          {/* Next state */}
+          <line x1="260" y1="160" x2="320" y2="160" stroke="#6366f1" strokeWidth="2" markerEnd="url(#a0)"/>
+          <text x="265" y="152" fontSize="9" fill="#818cf8">Next State</text>
+          {/* Memory box */}
+          <rect x="320" y="110" width="150" height="100" rx="10" fill="rgba(30,27,75,0.9)" stroke="#f59e0b" strokeWidth="2"/>
+          <rect x="320" y="110" width="150" height="4" rx="2" fill="#f59e0b" opacity="0.6"/>
+          <text x="395" y="158" fontSize="12" fill="#fbbf24" textAnchor="middle" fontWeight="700">Memory</text>
+          <text x="395" y="175" fontSize="11" fill="#64748b" textAnchor="middle">(Flip-Flops)</text>
+          {/* Feedback */}
+          <line x1="395" y1="210" x2="395" y2="250" stroke="#818cf8" strokeWidth="1.5" strokeDasharray="6"/>
+          <line x1="395" y1="250" x2="60"  y2="250" stroke="#818cf8" strokeWidth="1.5" strokeDasharray="6"/>
+          <line x1="60"  y1="250" x2="60"  y2="155" stroke="#818cf8" strokeWidth="1.5" strokeDasharray="6"/>
+          <line x1="60"  y1="155" x2="90"  y2="155" stroke="#818cf8" strokeWidth="1.5" markerEnd="url(#a0)"/>
+          <text x="200" y="268" fontSize="9" fill="#818cf8" textAnchor="middle" letterSpacing="0.1em">CURRENT STATE FEEDBACK</text>
         </svg>
-        <p className="seq-diagram-caption">Figure 1 — Block diagram of a general sequential circuit</p>
+        <p className="seq-diagram-caption">Figure 1 — General block diagram of a synchronous sequential circuit</p>
       </div>
 
       <h2>Types of Sequential Circuits</h2>
-      <p>Sequential circuits are classified based on how their state changes with respect to time:</p>
-      <ul>
-        <li>
-          <strong>Synchronous Sequential Circuits</strong> — State changes occur only at specific times
-          determined by a clock signal. All memory elements are triggered simultaneously by the
-          clock edge (rising or falling). They are predictable and easier to design.
-        </li>
-        <li>
-          <strong>Asynchronous Sequential Circuits</strong> — State changes can occur at any time
-          in response to input changes, without a clock. They are faster but harder to design and
-          analyze due to potential timing hazards.
-        </li>
-      </ul>
 
-      <h2>The Role of the Clock Signal</h2>
+      <div className="seq-grid-2">
+        <div className="seq-feature-card">
+          <span className="seq-feature-icon">⏱️</span>
+          <p className="seq-feature-title">Synchronous</p>
+          <p className="seq-feature-desc">State changes only at clock edges. Predictable, easy to design and analyze. Used in virtually all modern digital systems.</p>
+        </div>
+        <div className="seq-feature-card">
+          <span className="seq-feature-icon">⚡</span>
+          <p className="seq-feature-title">Asynchronous</p>
+          <p className="seq-feature-desc">State changes respond immediately to inputs — no clock. Faster but prone to hazards and difficult to design correctly.</p>
+        </div>
+      </div>
+
+      <h2>The Clock Signal</h2>
       <p>
-        In synchronous circuits, a <strong>clock signal</strong> is a periodic square wave that
-        coordinates all state changes. Flip-flops respond either on the <strong>rising edge</strong>
-        (positive-edge triggered) or <strong>falling edge</strong> (negative-edge triggered) of the clock.
+        In synchronous circuits, a periodic square-wave <strong>clock</strong> coordinates all state
+        changes. Flip-flops respond on the <strong>rising edge</strong> (positive-edge triggered) or
+        <strong>falling edge</strong> (negative-edge triggered).
       </p>
 
       <div className="seq-box info">
-        <p className="seq-box-title">Key Terminology</p>
+        <span className="seq-box-title">Key Terminology</span>
         <p>
-          <strong>State</strong> — The stored binary value(s) in the memory elements at any instant.<br/>
+          <strong>State</strong> — The binary values stored in flip-flops at a given instant.<br/>
+          <strong>Present State</strong> — The current stored value in the state register.<br/>
           <strong>Next State</strong> — The value the state will take after the next clock edge.<br/>
-          <strong>Present State</strong> — The current stored value in memory elements.<br/>
-          <strong>State Register</strong> — The collection of all flip-flops holding the circuit state.
+          <strong>State Register</strong> — All flip-flops holding the current circuit state.
         </p>
       </div>
 
-      <h2>Applications of Sequential Circuits</h2>
-      <ul>
-        <li>Registers and shift registers</li>
-        <li>Counters (ripple, synchronous, modulo-N)</li>
-        <li>Finite State Machines (FSMs) — Moore and Mealy</li>
-        <li>Memory units (RAM, ROM controllers)</li>
-        <li>Serial data communication (UART, SPI, I²C)</li>
-        <li>CPU pipelines and control units</li>
-      </ul>
+      <h2>Real-World Applications</h2>
+      <div className="seq-grid-2">
+        <div className="seq-feature-card"><span className="seq-feature-icon">🧮</span><p className="seq-feature-title">Registers & Shift Registers</p><p className="seq-feature-desc">Store and shift data in processors and communication systems.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">🔢</span><p className="seq-feature-title">Counters</p><p className="seq-feature-desc">Ripple, synchronous, and modulo-N counting circuits.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">🧠</span><p className="seq-feature-title">FSMs — Moore & Mealy</p><p className="seq-feature-desc">Control units in CPUs, communication protocols, traffic lights.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">💬</span><p className="seq-feature-title">Serial Communication</p><p className="seq-feature-desc">UART, SPI, I²C interfaces that send data bit-by-bit over time.</p></div>
+      </div>
 
-      <div className="seq-box warning">
-        <p className="seq-box-title">What's Coming Next</p>
+      <div className="seq-box success">
+        <span className="seq-box-title">What's Coming Next</span>
         <p>
-          In the following sections you will study <strong>Latches</strong> (the simplest memory
-          elements), then <strong>Flip-Flops</strong> (clocked versions), followed by analysis and
-          design procedures for complete sequential systems.
+          The next sections walk you through <strong>Latches</strong> → <strong>Flip-Flops</strong>
+          → <strong>Types</strong> → <strong>Analysis</strong> → <strong>Design Procedures</strong>
+          → <strong>State Diagrams</strong> → <strong>State Reduction</strong>. Each builds on the last.
         </p>
       </div>
 

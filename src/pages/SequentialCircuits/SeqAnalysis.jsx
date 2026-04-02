@@ -4,68 +4,43 @@ import SeqLayout from "./SeqLayout";
 const SeqAnalysis = () => (
   <SeqLayout
     title="Analysis of Sequential Circuits"
-    subtitle="Given a sequential circuit diagram, determine its state table, state diagram, and timing behavior."
+    subtitle="Given a circuit schematic, systematically determine its state table, state diagram, and timing behavior."
   >
-    <div className="seq-content">
+    <div className="seq-content-body">
 
       <div className="seq-box">
-        <p className="seq-box-title">Goal of Analysis</p>
+        <span className="seq-box-title">Goal of Analysis</span>
         <p>
-          <strong>Analysis</strong> of a sequential circuit means: given a circuit schematic,
-          determine what the circuit <em>does</em> — specifically, how its state evolves over
-          time for all possible input sequences. The result is expressed as a
-          <strong>state table</strong> or <strong>state diagram</strong>.
+          <strong>Analysis</strong> means: given a circuit schematic, determine what it
+          <em> does</em> — how its state evolves over time for all input sequences. The results
+          are expressed as a <strong>state table</strong> and <strong>state diagram</strong>.
         </p>
       </div>
 
-      <h2>Step-by-Step Analysis Procedure</h2>
-      <p>
-        Follow these steps to analyze any synchronous sequential circuit:
-      </p>
-      <ol>
-        <li>
-          <strong>Identify state variables</strong> — Label the output of each flip-flop
-          (Q₁, Q₂, …). The number of flip-flops determines the number of states: 2<sup>n</sup>
-          possible states for n flip-flops.
-        </li>
-        <li>
-          <strong>Write flip-flop input equations</strong> — Express the input of each flip-flop
-          (D, J/K, S/R, or T) as a Boolean function of the current state and external inputs.
-        </li>
-        <li>
-          <strong>Write output equations</strong> — Express each circuit output as a Boolean
-          function of the current state (and inputs if it's a Mealy machine).
-        </li>
-        <li>
-          <strong>Determine next state</strong> — Using the flip-flop's characteristic equation,
-          compute Q(t+1) for every combination of present state and input.
-        </li>
-        <li>
-          <strong>Construct the state table</strong> — Tabulate present state, input, next state,
-          and output for every combination.
-        </li>
-        <li>
-          <strong>Draw the state diagram</strong> — Convert the table into a directed graph.
-        </li>
-      </ol>
+      <h2>Step-by-Step Procedure</h2>
 
-      <h2>Worked Example: 2-Bit Counter with D Flip-Flops</h2>
+      <div className="seq-grid-2">
+        <div className="seq-feature-card"><span className="seq-feature-icon">1️⃣</span><p className="seq-feature-title">Identify State Variables</p><p className="seq-feature-desc">Label each flip-flop output Q₁, Q₂, … Number of states = 2ⁿ for n flip-flops.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">2️⃣</span><p className="seq-feature-title">Write FF Input Equations</p><p className="seq-feature-desc">Express each flip-flop's input (D, J/K, T) as a Boolean function of state and external inputs.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">3️⃣</span><p className="seq-feature-title">Write Output Equations</p><p className="seq-feature-desc">Express each output as f(state) for Moore, or f(state, input) for Mealy.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">4️⃣</span><p className="seq-feature-title">Find Next State</p><p className="seq-feature-desc">Use the FF's characteristic equation to compute Q⁺ for every state-input combination.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">5️⃣</span><p className="seq-feature-title">Construct State Table</p><p className="seq-feature-desc">Tabulate: present state | input | next state | output for every combination.</p></div>
+        <div className="seq-feature-card"><span className="seq-feature-icon">6️⃣</span><p className="seq-feature-title">Draw State Diagram</p><p className="seq-feature-desc">Convert the table into a directed graph with labeled transitions.</p></div>
+      </div>
+
+      <h2>Worked Example — 2-Bit Counter</h2>
       <p>
-        Consider a circuit with two D flip-flops (Q₁ = MSB, Q₀ = LSB) and no external inputs.
-        The flip-flop inputs are:
+        Two D flip-flops (Q₁ = MSB, Q₀ = LSB), no external inputs. Flip-flop input equations:
       </p>
+
       <div className="seq-box info">
-        <p className="seq-box-title">Flip-Flop Input Equations</p>
-        <p>
-          D₁ = Q₁ ⊕ Q₀ &nbsp;&nbsp; (XOR)<br/>
-          D₀ = Q̄₀ &nbsp;&nbsp; (complement of Q₀)
-        </p>
+        <span className="seq-box-title">Input Equations</span>
+        <code className="seq-equation">D₁ = Q₁ ⊕ Q₀</code>
+        <code className="seq-equation">D₀ = Q̄₀</code>
       </div>
 
-      <h2>Step 1 — Compute Next States</h2>
-      <p>
-        Using D FF characteristic equation Q(t+1) = D:
-      </p>
+      <p>Using Q⁺ = D for each flip-flop:</p>
+
       <div className="seq-table-wrap">
         <table className="seq-table">
           <thead>
@@ -77,130 +52,118 @@ const SeqAnalysis = () => (
             </tr>
           </thead>
           <tbody>
-            <tr><td>00</td><td>0⊕0 = 0</td><td>1</td><td>01</td></tr>
-            <tr><td>01</td><td>0⊕1 = 1</td><td>0</td><td>10</td></tr>
-            <tr><td>10</td><td>1⊕0 = 1</td><td>1</td><td>11</td></tr>
-            <tr><td>11</td><td>1⊕1 = 0</td><td>0</td><td>00</td></tr>
+            <tr><td>00</td><td>0⊕0 = <strong>0</strong></td><td><strong>1</strong></td><td>01</td></tr>
+            <tr><td>01</td><td>0⊕1 = <strong>1</strong></td><td><strong>0</strong></td><td>10</td></tr>
+            <tr><td>10</td><td>1⊕0 = <strong>1</strong></td><td><strong>1</strong></td><td>11</td></tr>
+            <tr><td>11</td><td>1⊕1 = <strong>0</strong></td><td><strong>0</strong></td><td>00</td></tr>
           </tbody>
         </table>
       </div>
 
-      <p>
-        The sequence is: <strong>00 → 01 → 10 → 11 → 00 → …</strong> — this is a
-        2-bit binary up-counter!
-      </p>
+      <p>Sequence: <strong>00 → 01 → 10 → 11 → 00 → …</strong> — a 2-bit binary up-counter.</p>
 
       <div className="seq-diagram">
-        <svg viewBox="0 0 460 200" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono', monospace"}}>
+        <svg viewBox="0 0 480 220" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono',monospace"}}>
           <defs>
-            <marker id="arrd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L0,6 L8,3 z" fill="#00ff88"/>
+            <marker id="aSA" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto">
+              <path d="M0,0 L0,5 L7,2.5z" fill="#10b981"/>
             </marker>
           </defs>
           {/* States */}
-          <circle cx="100" cy="100" r="35" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="100" y="96" fontSize="13" fill="#00d4ff" textAnchor="middle" fontWeight="700">00</text>
-          <text x="100" y="112" fontSize="9" fill="#8b9dc3" textAnchor="middle">S₀</text>
-
-          <circle cx="250" cy="40" r="35" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="250" y="36" fontSize="13" fill="#00d4ff" textAnchor="middle" fontWeight="700">01</text>
-          <text x="250" y="52" fontSize="9" fill="#8b9dc3" textAnchor="middle">S₁</text>
-
-          <circle cx="370" cy="100" r="35" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="370" y="96" fontSize="13" fill="#00d4ff" textAnchor="middle" fontWeight="700">10</text>
-          <text x="370" y="112" fontSize="9" fill="#8b9dc3" textAnchor="middle">S₂</text>
-
-          <circle cx="250" cy="165" r="35" fill="#1e2842" stroke="#00d4ff" strokeWidth="2"/>
-          <text x="250" y="161" fontSize="13" fill="#00d4ff" textAnchor="middle" fontWeight="700">11</text>
-          <text x="250" y="177" fontSize="9" fill="#8b9dc3" textAnchor="middle">S₃</text>
-
+          {[
+            [100,100,"00","S₀"],
+            [240,50, "01","S₁"],
+            [380,100,"10","S₂"],
+            [240,165,"11","S₃"],
+          ].map(([cx,cy,lbl,sub])=>(
+            <g key={lbl}>
+              <circle cx={cx} cy={cy} r="38" fill="rgba(30,27,75,.9)" stroke="#6366f1" strokeWidth="2"/>
+              <circle cx={cx} cy={cy} r="38" fill="none" stroke="#818cf8" strokeWidth="1" opacity="0.4" r="33"/>
+              <text x={cx} y={cy-4} fontSize="15" fill="#c7d2fe" textAnchor="middle" fontWeight="800">{lbl}</text>
+              <text x={cx} y={cy+14} fontSize="9"  fill="#475569" textAnchor="middle">{sub}</text>
+            </g>
+          ))}
           {/* Arrows */}
-          <line x1="132" y1="82" x2="218" y2="52" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arrd)"/>
-          <line x1="283" y1="52" x2="338" y2="78" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arrd)"/>
-          <line x1="355" y1="132" x2="283" y2="155" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arrd)"/>
-          <line x1="218" y1="155" x2="132" y2="118" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arrd)"/>
+          <line x1="136" y1="83" x2="204" y2="62" stroke="#10b981" strokeWidth="2.5" markerEnd="url(#aSA)"/>
+          <line x1="276" y1="62" x2="344" y2="83" stroke="#10b981" strokeWidth="2.5" markerEnd="url(#aSA)"/>
+          <line x1="362" y1="136" x2="276" y2="152" stroke="#10b981" strokeWidth="2.5" markerEnd="url(#aSA)"/>
+          <line x1="204" y1="152" x2="136" y2="120" stroke="#10b981" strokeWidth="2.5" markerEnd="url(#aSA)"/>
+          {/* Center label */}
+          <text x="240" y="108" fontSize="11" fill="#374151" textAnchor="middle">2-bit</text>
+          <text x="240" y="122" fontSize="11" fill="#374151" textAnchor="middle">counter</text>
         </svg>
         <p className="seq-diagram-caption">Figure 1 — State diagram of a 2-bit binary up-counter</p>
       </div>
 
       <h2>Moore vs Mealy Machines</h2>
-      <p>
-        Sequential circuits can be classified into two types based on how outputs are generated:
-      </p>
       <div className="seq-table-wrap">
         <table className="seq-table">
           <thead>
             <tr><th>Property</th><th>Moore Machine</th><th>Mealy Machine</th></tr>
           </thead>
           <tbody>
-            <tr><td>Output depends on</td><td>Present state only</td><td>Present state AND inputs</td></tr>
-            <tr><td>Output changes</td><td>Only with clock edge</td><td>Can change asynchronously with inputs</td></tr>
-            <tr><td>States needed</td><td>More states (typically)</td><td>Fewer states (typically)</td></tr>
+            <tr><td>Output depends on</td><td>Present state only</td><td>Present state + inputs</td></tr>
+            <tr><td>Output changes</td><td>Only with clock edge</td><td>Immediately with inputs</td></tr>
+            <tr><td>States needed</td><td>More (typically)</td><td>Fewer (typically)</td></tr>
             <tr><td>Glitch risk</td><td>Lower</td><td>Higher (input-sensitive)</td></tr>
-            <tr><td>State diagram</td><td>Output labeled on states</td><td>Output labeled on transitions</td></tr>
+            <tr><td>Output labeling</td><td>Inside state circle</td><td>On transition arrow</td></tr>
           </tbody>
         </table>
       </div>
 
       <h2>Timing Diagram Analysis</h2>
       <p>
-        A <strong>timing diagram</strong> shows the clock, input signals, state signals, and outputs
-        all plotted against time. To trace through a sequential circuit on a timing diagram:
+        A timing diagram shows CLK, inputs, state bits, and outputs all plotted against time.
+        To read it: at each active clock edge, sample the input → look up next state in the
+        table → the new state appears after propagation delay t<sub>p</sub>.
       </p>
-      <ol>
-        <li>Note the current state before each clock edge</li>
-        <li>Look up the input values <em>just before</em> the clock edge</li>
-        <li>Use the state table to find the next state and output</li>
-        <li>Plot the new state/output values <em>after</em> the clock edge (plus propagation delay)</li>
-      </ol>
 
       <div className="seq-diagram">
-        <svg viewBox="0 0 500 200" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono', monospace"}}>
-          {/* Clock */}
-          <text x="10" y="35" fontSize="11" fill="#8b9dc3">CLK</text>
-          <polyline points="50,50 50,20 130,20 130,50 210,50 210,20 290,20 290,50 370,50 370,20 450,20 450,50"
-            fill="none" stroke="#00d4ff" strokeWidth="2"/>
+        <svg viewBox="0 0 540 220" xmlns="http://www.w3.org/2000/svg" style={{fontFamily:"'JetBrains Mono',monospace"}}>
+          {/* CLK */}
+          <text x="10" y="42" fontSize="11" fill="#94a3b8" fontWeight="600">CLK</text>
+          <polyline points="55,56 55,24 135,24 135,56 215,56 215,24 295,24 295,56 375,56 375,24 455,24 455,56"
+            fill="none" stroke="#6366f1" strokeWidth="2.5"/>
           {/* Q0 */}
-          <text x="10" y="95" fontSize="11" fill="#8b9dc3">Q₀</text>
-          <polyline points="50,100 130,100 130,80 210,80 210,100 290,100 290,80 370,80 370,100 450,100"
-            fill="none" stroke="#00ff88" strokeWidth="2"/>
+          <text x="10" y="105" fontSize="11" fill="#94a3b8" fontWeight="600">Q₀</text>
+          <polyline points="55,112 135,112 135,92 215,92 215,112 295,112 295,92 375,92 375,112 455,112"
+            fill="none" stroke="#10b981" strokeWidth="2.5"/>
           {/* Q1 */}
-          <text x="10" y="155" fontSize="11" fill="#8b9dc3">Q₁</text>
-          <polyline points="50,170 210,170 210,150 290,150 290,170 370,170 370,150 450,150 450,170"
-            fill="none" stroke="#fbbf24" strokeWidth="2"/>
+          <text x="10" y="165" fontSize="11" fill="#94a3b8" fontWeight="600">Q₁</text>
+          <polyline points="55,175 215,175 215,155 295,155 295,175 375,175 375,155 455,155 455,175"
+            fill="none" stroke="#818cf8" strokeWidth="2.5"/>
           {/* Edge markers */}
-          <line x1="130" y1="15" x2="130" y2="175" stroke="#ff3366" strokeWidth="1" strokeDasharray="3"/>
-          <line x1="210" y1="15" x2="210" y2="175" stroke="#ff3366" strokeWidth="1" strokeDasharray="3"/>
-          <line x1="290" y1="15" x2="290" y2="175" stroke="#ff3366" strokeWidth="1" strokeDasharray="3"/>
-          <line x1="370" y1="15" x2="370" y2="175" stroke="#ff3366" strokeWidth="1" strokeDasharray="3"/>
-          {/* Labels */}
-          <text x="60" y="195" fontSize="9" fill="#8b9dc3">t=0 (00)</text>
-          <text x="150" y="195" fontSize="9" fill="#8b9dc3">t=1 (01)</text>
-          <text x="230" y="195" fontSize="9" fill="#8b9dc3">t=2 (10)</text>
-          <text x="310" y="195" fontSize="9" fill="#8b9dc3">t=3 (11)</text>
-          <text x="390" y="195" fontSize="9" fill="#8b9dc3">t=4 (00)</text>
+          {[135,215,295,375].map(x=>(
+            <line key={x} x1={x} y1="18" x2={x} y2="182" stroke="rgba(99,102,241,.25)" strokeWidth="1" strokeDasharray="4"/>
+          ))}
+          {/* State labels */}
+          {[["00",55],["01",155],["10",235],["11",315],["00",395]].map(([s,x])=>(
+            <text key={x} x={x+27} y="205" fontSize="10" fill="#475569" textAnchor="middle">{s}</text>
+          ))}
+          <text x="240" y="218" fontSize="9" fill="#374151" textAnchor="middle" letterSpacing="0.1em">COUNTER STATE</text>
         </svg>
-        <p className="seq-diagram-caption">Figure 2 — Timing diagram of the 2-bit up-counter</p>
+        <p className="seq-diagram-caption">Figure 2 — Timing diagram for the 2-bit up-counter</p>
       </div>
 
-      <h2>Analysis of JK Flip-Flop Circuits</h2>
-      <p>
-        The same analysis procedure applies to circuits using JK, T, or SR flip-flops. The only
-        difference is the characteristic equation used to find the next state:
-      </p>
-      <ul>
-        <li>JK: Q(t+1) = J·Q̄ + K̄·Q</li>
-        <li>T: Q(t+1) = T⊕Q</li>
-        <li>SR: Q(t+1) = S + R̄·Q (with SR=0)</li>
-        <li>D: Q(t+1) = D</li>
-      </ul>
+      <h2>Characteristic Equations Reference</h2>
+      <div className="seq-table-wrap">
+        <table className="seq-table">
+          <thead><tr><th>Flip-Flop</th><th>Characteristic Equation</th><th>Use in Analysis</th></tr></thead>
+          <tbody>
+            <tr><td>D</td><td>Q⁺ = D</td><td>Simplest — Q⁺ directly equals the D input</td></tr>
+            <tr><td>JK</td><td>Q⁺ = JQ̄ + K̄Q</td><td>Evaluate J and K, then apply equation</td></tr>
+            <tr><td>T</td><td>Q⁺ = T ⊕ Q</td><td>XOR T with current Q</td></tr>
+            <tr><td>SR</td><td>Q⁺ = S + R̄Q</td><td>Verify SR=0 constraint first</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <div className="seq-box warning">
-        <p className="seq-box-title">Common Mistakes to Avoid</p>
+        <span className="seq-box-title">Common Mistakes</span>
         <p>
           • Always use the state <em>before</em> the clock edge as "present state".<br/>
-          • For Mealy machines, use input values <em>just before</em> the edge for output computation.<br/>
-          • Don't confuse flip-flop <em>inputs</em> (J, K, D, T, S, R) with the <em>state outputs</em> (Q).
+          • For Mealy machines, use input values just <em>before</em> the edge for output.<br/>
+          • Don't confuse flip-flop <em>inputs</em> (D, J, K…) with <em>state outputs</em> (Q).
         </p>
       </div>
 
