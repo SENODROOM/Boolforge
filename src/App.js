@@ -50,6 +50,16 @@ import SignedUnsignedArithmetic from "./pages/ArithmeticFunctionsAndHDLs/SignedU
 import EncoderPage from "./pages/EncoderPage";
 import DecoderPage from "./pages/DecoderPage";
 
+// SEQUENTIAL CIRCUITS:
+import SeqIntro from "./pages/SequentialCircuits/SeqIntro";
+import SeqLatches from "./pages/SequentialCircuits/SeqLatches";
+import SeqFlipFlops from "./pages/SequentialCircuits/SeqFlipFlops";
+import SeqFlipFlopTypes from "./pages/SequentialCircuits/SeqFlipFlopTypes";
+import SeqAnalysis from "./pages/SequentialCircuits/SeqAnalysis";
+import SeqDesignProcedures from "./pages/SequentialCircuits/SeqDesignProcedures";
+import SeqStateDiagram from "./pages/SequentialCircuits/SeqStateDiagram";
+import SeqStateReduction from "./pages/SequentialCircuits/SeqStateReduction";
+
 function App() {
   return (
     <>
@@ -135,6 +145,28 @@ function App() {
           {/* Combinational Circuits */}
           <Route path="/encoder" element={<EncoderPage />} />
           <Route path="/decoder" element={<DecoderPage />} />
+
+          {/* Sequential Circuits */}
+          <Route path="/sequential/intro" element={<SeqIntro />} />
+          <Route path="/sequential/latches" element={<SeqLatches />} />
+          <Route path="/sequential/flip-flops" element={<SeqFlipFlops />} />
+          <Route
+            path="/sequential/flip-flop-types"
+            element={<SeqFlipFlopTypes />}
+          />
+          <Route path="/sequential/analysis" element={<SeqAnalysis />} />
+          <Route
+            path="/sequential/design-procedures"
+            element={<SeqDesignProcedures />}
+          />
+          <Route
+            path="/sequential/state-diagram"
+            element={<SeqStateDiagram />}
+          />
+          <Route
+            path="/sequential/state-reduction"
+            element={<SeqStateReduction />}
+          />
         </Routes>
       </BrowserRouter>
     </>

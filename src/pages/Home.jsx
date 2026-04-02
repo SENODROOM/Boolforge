@@ -61,6 +61,9 @@ const Home = () => {
             <Link to="/book/ch2" className="home-nav-link">
               Book Ch2
             </Link>
+            <Link to="/sequential/intro" className="home-nav-link">
+              Sequential
+            </Link>
           </nav>
         </div>
       </header>
@@ -172,7 +175,7 @@ const Home = () => {
             </div>
           </article>
 
-          {/* Combinational Circuits Section — NEW */}
+          {/* Combinational Circuits Section */}
           <article className="home-card">
             <h3>🔀 Combinational Circuits</h3>
             <p>
@@ -186,6 +189,45 @@ const Home = () => {
               </Link>
               <Link to="/decoder" className="home-card-link">
                 Decoder
+              </Link>
+            </div>
+          </article>
+
+          {/* Sequential Circuits Section — NEW */}
+          <article className="home-card sequential-card">
+            <h3>🔁 Sequential Circuits</h3>
+            <p>
+              Dive into memory elements, state machines, and time-dependent
+              circuits — from basic latches to full design procedures with state
+              tables and excitation maps.
+            </p>
+            <div className="home-card-links">
+              <Link to="/sequential/intro" className="home-card-link">
+                Introduction
+              </Link>
+              <Link to="/sequential/latches" className="home-card-link">
+                Latches
+              </Link>
+              <Link to="/sequential/flip-flops" className="home-card-link">
+                Flip-Flops
+              </Link>
+              <Link to="/sequential/flip-flop-types" className="home-card-link">
+                Types of Flip-Flops
+              </Link>
+              <Link to="/sequential/analysis" className="home-card-link">
+                Analysis
+              </Link>
+              <Link
+                to="/sequential/design-procedures"
+                className="home-card-link"
+              >
+                Design Procedures
+              </Link>
+              <Link to="/sequential/state-diagram" className="home-card-link">
+                State Diagrams & Tables
+              </Link>
+              <Link to="/sequential/state-reduction" className="home-card-link">
+                State Reduction & Excitation
               </Link>
             </div>
           </article>

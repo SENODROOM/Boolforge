@@ -637,3 +637,36 @@ summary:hover {
     justify-content: center;
   }
 }
+/* Sequential Circuits card gets a distinct purple-indigo accent
+   to visually separate it from the blue combinational-circuits card */
+.sequential-card {
+  background: radial-gradient(
+    circle at top left,
+    rgba(167, 139, 250, 0.18),
+    /* purple-400 at low opacity */ rgba(15, 23, 42, 0.96)
+  );
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.sequential-card::before {
+  background: radial-gradient(
+    circle at top right,
+    rgba(139, 92, 246, 0.28),
+    transparent 60%
+  ) !important;
+}
+
+.sequential-card h3 {
+  color: #c4b5fd; /* violet-300 */
+}
+
+/* Links inside the sequential card use the violet palette */
+.sequential-card .home-card-link {
+  border-color: rgba(139, 92, 246, 0.65);
+  color: #ddd6fe; /* violet-200 */
+}
+
+.sequential-card .home-card-link:hover {
+  background: rgba(109, 40, 217, 0.2);
+  box-shadow: 0 10px 25px rgba(109, 40, 217, 0.3);
+}
