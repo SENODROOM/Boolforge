@@ -3,7 +3,6 @@ import React from "react";
 export default function SeqTable({ data }) {
   if (!data) return null; // Handle empty data gracefully
   const { headers, rows } = data;
-  const keys = headers.map((header) => header.toLowerCase());
 
   return (
     <div className="seq-table-wrap">
@@ -18,8 +17,8 @@ export default function SeqTable({ data }) {
         <tbody>
           {rows.map((row, index) => (
             <tr key={index}>
-              {keys.map((key, i) => (
-                <td key={i}>{row[key]}</td>
+              {headers.map((header, i) => (
+                <td key={i}>{row[header]}</td>
               ))}
             </tr>
           ))}
