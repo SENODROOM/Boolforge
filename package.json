@@ -1,6 +1,6 @@
 {
-  "name": "helloworld",
-  "version": "0.1.0",
+  "name": "boolforge",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
