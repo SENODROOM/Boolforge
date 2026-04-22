@@ -21,7 +21,7 @@ import ParityBitCalculator from "./pages/ParityBitCalculator";
 import KMapGenerator from "./pages/KmapGenerator";
 import GateExplanation from "./pages/GateExplanation";
 import TimeDiagrams from "./pages/TimeDiagrams";
-import BooleanAlgebraOverview from "./pages/BooleanAlgebraOverview";
+import BooleanAlgebraOverview from "./pages/BooleanAlgebra/BooleanAlgebraOverview";
 import BooleanIdentities from "./pages/BooleanIdentities";
 import DualityPrinciple from "./pages/DualityPrinciple";
 import BooleanLaws from "./pages/BooleanLaws";
